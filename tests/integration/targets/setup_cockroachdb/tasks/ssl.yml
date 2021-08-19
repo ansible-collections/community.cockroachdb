@@ -1,0 +1,14 @@
+- name: Create SSL-related dirs
+  file:
+    state: directory
+    path: '{{ item }}'
+  loop:
+  - '{{ cert_dir }}'
+  - '{{ key_dir }}'
+
+- name: Generalte certs and keys
+  command: '{{ item }}'
+  loop:
+  - 'cockroach cert create-ca --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'
+  - 'cockroach cert create-node localhost $(hostname) --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'
+  - 'cockroach cert create-client root --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'

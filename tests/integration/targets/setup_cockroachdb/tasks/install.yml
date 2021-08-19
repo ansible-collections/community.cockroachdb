@@ -1,0 +1,62 @@
+- name: Install driver
+  pip:
+    name: psycopg2-binary
+
+- name: Download archive
+  get_url:
+    url: 'https://binaries.cockroachdb.com/{{ cockroachdb_full_version }}.tgz'
+    dest: './{{ cockroachdb_full_version }}.tgz'
+
+- name: Unpack
+  unarchive:
+    src: '{{ cockroachdb_full_version }}.tgz'
+    dest: .
+
+- name: Copy executables
+  copy:
+    remote_src: yes
+    src: '{{ cockroachdb_full_version }}/cockroach'
+    dest: /usr/local/bin/
+    mode: u+x
+
+- name: Create a directory for external libraries
+  file:
+    state: directory
+    path: /usr/local/lib/cockroach
+
+- name: Copy lib files
+  copy:
+    remote_src: yes
+    src: '{{ item }}'
+    dest: /usr/local/lib/cockroach
+  loop:
+    - '{{ cockroachdb_full_version }}/lib/libgeos.so'
+    - '{{ cockroachdb_full_version }}/lib/libgeos_c.so'
+
+- name: Start a temporary, in-memory cluster to check
+  shell: cockroach demo --execute="SELECT ST_IsValid(ST_MakePoint(1,2));"
+  register: result
+
+- name: Check that the command returns what's expected
+  assert:
+    that:
+      - result.stdout == 'st_isvalid\ntrue'
+
+- name: Copy systemd config
+  copy:
+    src: service.conf
+    dest: /etc/systemd/system/cockroachdb.service
+
+- name: Reload systemd
+  shell: systemctl daemon-reload
+
+- name: Configure SSL
+  import_tasks: ssl.yml
+
+- name: Start cockroachdb
+  systemd:
+    name: cockroachdb
+    state: started
+
+- name: Check
+  shell: systemctl status cockroachdb

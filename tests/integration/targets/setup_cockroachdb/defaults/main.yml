@@ -1,0 +1,7 @@
+cockroachdb_full_version: cockroach-v21.1.6.linux-amd64
+
+cert_dir: /tmp/certs
+key_dir: /tmp/keys
+ssl_root_cert: /tmp/certs/ca.crt
+ssl_cert: /tmp/certs/client.root.crt
+ssl_key: /tmp/certs/client.root.key

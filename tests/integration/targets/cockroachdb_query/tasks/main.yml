@@ -1,0 +1,12 @@
+---
+
+- name: Check connection
+  cockroachdb_query:
+    ssl_mode: verify-full
+    ssl_root_cert: '{{ ssl_root_cert }}'
+    ssl_cert: '{{ ssl_cert }}'
+    ssl_key: '{{ ssl_key }}'
+    query: 'SELECT VERSION();'
+
+- name: For quick testing, remove later
+  meta: end_play
