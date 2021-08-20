@@ -23,19 +23,20 @@ from ansible.module_utils.six import iteritems
 from distutils.version import LooseVersion
 
 
-def cockroachdb_common_argument_spec():
+def common_argument_spec():
     """
     Return a dictionary with common options.
 
     The options are used by most of CockroachDB modules.
     """
     return dict(
-        login_user=dict(default='root'),
-        login_password=dict(default='', no_log=True),
-        login_host=dict(default='localhost'),
-        login_unix_socket=dict(default=''),
+        login_user=dict(type='str', default='root'),
+        login_password=dict(type='str', no_log=True),
+        login_host=dict(type='str', default='localhost'),
+        login_unix_socket=dict(type='path'),
         login_port=dict(type='int', default=26257),
         ssl_mode=dict(
+            type='str',
             default='prefer',
             choices=[
                 'allow',
@@ -141,8 +142,9 @@ def get_conn_params(params_dict):
               if k in params_map and v != '' and v is not None)
 
     # If a login_unix_socket is specified, incorporate it here.
-    is_localhost = "host" not in kw or kw["host"] is None or kw["host"] == "localhost"
-    if is_localhost and params_dict["login_unix_socket"] != "":
-        kw["host"] = params_dict["login_unix_socket"]
+    is_localhost = 'host' not in kw or kw['host'] is None or kw['host'] == 'localhost'
+
+    if is_localhost and params_dict['login_unix_socket'] is not None:
+        kw['host'] = params_dict['login_unix_socket']
 
     return kw

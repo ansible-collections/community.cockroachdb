@@ -27,7 +27,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils._text import to_native
 
 from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb import (
-    cockroachdb_common_argument_spec,
+    common_argument_spec,
     CockroachDB,
     get_conn_params,
 )
@@ -134,7 +134,7 @@ def execute(module, conn, cursor, query, args):
 
 def main():
     # Set up arguments
-    argument_spec = cockroachdb_common_argument_spec()
+    argument_spec = common_argument_spec()
     argument_spec.update(
         query=dict(type='str'),
         positional_args=dict(type='list', elements='raw'),
