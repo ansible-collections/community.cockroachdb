@@ -4,7 +4,8 @@
 # still belong to the author of the module, and may assign their own license
 # to the complete work.
 #
-# Simplified BSD License (see licenses/simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
+# Simplified BSD License
+# (see licenses/simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
@@ -106,6 +107,24 @@ class CockroachDB():
         return self.connection
 
 
+def get_params_map():
+    """Get params map for mapping collection-related module options
+    to psycopg2.connect() arguments.
+
+    Returns dictionary.
+    """
+    return {
+        'login_host': 'host',
+        'login_user': 'user',
+        'login_password': 'password',
+        'login_port': 'port',
+        'ssl_mode': 'sslmode',
+        'ssl_root_cert': 'sslrootcert',
+        'ssl_cert': 'sslcert',
+        'ssl_key': 'sslkey',
+    }
+
+
 def get_conn_params(params_dict):
     """Get connection parameters from the passed dictionary.
 
@@ -116,16 +135,7 @@ def get_conn_params(params_dict):
     """
     # To use defaults values, keyword arguments must be absent, so
     # check which values are empty and don't include in the return dictionary
-    params_map = {
-        'login_host': 'host',
-        'login_user': 'user',
-        'login_password': 'password',
-        'login_port': 'port',
-        'ssl_mode': 'sslmode',
-        'ssl_root_cert': 'sslrootcert',
-        'ssl_cert': 'sslcert',
-        'ssl_key': 'sslkey',
-    }
+    params_map = get_params_map()
 
     kw = dict((params_map[k], v) for (k, v) in iteritems(params_dict)
               if k in params_map and v != '' and v is not None)
