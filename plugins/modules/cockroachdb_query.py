@@ -73,7 +73,22 @@ def fetch_from_cursor(cursor):
     return query_result
 
 
-def execute(module, conn, cursor, query):
+def get_args(positional_args, named_args):
+    """Get arguments to pass them to cursor.execute() later.
+
+    They are mutually exclusive, so at least one of them is always None.
+
+    Returns one of passed arguments which is True or None.
+    """
+    if positional_args:
+        return positional_args
+    elif named_args:
+        return named_args
+    else:
+        return None
+
+
+def execute(module, conn, cursor, query, args):
     """Execute query in CockroachDB database.
 
     Args:
@@ -81,6 +96,7 @@ def execute(module, conn, cursor, query):
         conn (psycopg2 connection) -- Psycopg2 connection object.
         cursor (cursor): Cursor object of a database Python connector.
         query (str) -- Query to execute.
+        args (dict|tuple) -- Data structure to pass to cursor.execute as query parameters.
 
     Returns a tuple (
         statusmessage (str) -- Status message returned by psycopg2, for example, "SELECT 1".
@@ -92,7 +108,7 @@ def execute(module, conn, cursor, query):
     rowcount = None
     query_result = []
     try:
-        cursor.execute(query)
+        cursor.execute(query, args)
         statusmessage = cursor.statusmessage
         rowcount = cursor.rowcount
 
@@ -121,24 +137,33 @@ def main():
     argument_spec = cockroachdb_common_argument_spec()
     argument_spec.update(
         query=dict(type='str'),
+        positional_args=dict(type='list', elements='raw'),
+        named_args=dict(type='dict'),
     )
 
     # Instantiate an object of module class
     module = AnsibleModule(
         argument_spec=argument_spec,
+        mutually_exclusive=(('positional_args', 'named_args'),),
         supports_check_mode=False,
     )
 
     # Assign passed options to variables
     query = module.params["query"]
+    positional_args = module.params["positional_args"]
+    named_args = module.params["named_args"]
 
     # Connect to DB, get cursor
     cockroachdb = CockroachDB(module)
     conn = cockroachdb.connect(conn_params=get_conn_params(module.params))
     cursor = conn.cursor()
 
+    # Prepare args:
+    args = get_args(positional_args, named_args)
+
     # Execute query
-    statusmessage, rowcount, query_result = execute(module, conn, cursor, query)
+    statusmessage, rowcount, query_result = execute(module, conn, cursor,
+                                                    query, args)
 
     # Users will get this in JSON output after execution
     kw = dict(
