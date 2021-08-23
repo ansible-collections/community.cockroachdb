@@ -78,7 +78,7 @@ def get_args(positional_args, named_args):
 
     They are mutually exclusive, so at least one of them is always None.
 
-    Returns one of passed arguments which is True or None.
+    Returns one of passed arguments which is not None or None.
     """
     if positional_args:
         return positional_args
