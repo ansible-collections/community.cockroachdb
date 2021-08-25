@@ -10,6 +10,7 @@ import pytest
 
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_query import (
     convert_to_supported,
+    fetch_from_cursor,
     get_args,
 )
 
@@ -43,3 +44,23 @@ def test_convert_to_supported(input_, expected):
     # and datetime objects to strings. Otherwise,
     # it returns same value without changing it.
     assert convert_to_supported(input_) == expected
+
+
+@pytest.mark.parametrize('input_, expected',
+    [
+        ([['first value', timedelta(0, 43200)]], [['first value', '12:00:00']]),
+        ([[1, Decimal('1.01')]], [[1, 1.01]]),
+        ([['string']], [['string']]),
+        ([[None]], [[None]]),
+        ([[1], [2], [1, Decimal('1.01')]], [[1], [2], [1, 1.01]]),
+        ([[1], [2]], [[1], [2]]),
+    ]
+)
+def test_fetch_from_cursor(input_, expected):
+    # fetch_from_cursor function requires an argument
+    # of psycopg2 cursor class. In the context
+    # of the function, it works as iterator, so we're
+    # passing list as input_. It invokes cover_to_support
+    # function covered above to convert element
+    # of not supported types to appropriate ones.
+    assert fetch_from_cursor(input_) == expected
