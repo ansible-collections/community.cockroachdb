@@ -88,12 +88,11 @@ def get_args(positional_args, named_args):
         return None
 
 
-def execute(module, conn, cursor, query, args):
+def execute(module, cursor, query, args):
     """Execute query in CockroachDB database.
 
     Args:
         module (AnsibleModule) -- Object of ansible.module_utils.basic.AnsibleModule class.
-        conn (psycopg2 connection) -- Psycopg2 connection object.
         cursor (cursor): Cursor object of a database Python connector.
         query (str) -- Query to execute.
         args (dict|tuple) -- Data structure to pass to cursor.execute as query parameters.
@@ -124,10 +123,6 @@ def execute(module, conn, cursor, query, args):
 
     except Exception as e:
         module.fail_json(msg='Cannot execute query "%s": %s' % (query, to_native(e)))
-
-    finally:
-        cursor.close()
-        conn.close()
 
     return statusmessage, rowcount, query_result
 
@@ -164,6 +159,13 @@ def main():
     # Execute query
     statusmessage, rowcount, query_result = execute(module, conn, cursor,
                                                     query, args)
+
+    # Close cursor and conn
+    try:
+        cursor.close()
+        conn.close()
+    except Exception:
+        pass
 
     # Users will get this in JSON output after execution
     kw = dict(
