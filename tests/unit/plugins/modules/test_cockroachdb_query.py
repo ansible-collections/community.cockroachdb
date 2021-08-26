@@ -92,6 +92,9 @@ def test_execute(sequence, expected):
             self.query = query
             self.args = args
 
+        def mogrify(self, query, args):
+            return query, args
+
         def __iter__(self):
             for item in self.sequence:
                 yield item
@@ -109,7 +112,7 @@ def test_execute(sequence, expected):
     args = (1, 2, 3)
 
     # Invoke the function
-    statusmessage, rowcount, res = execute(module, cursor, query, args)
+    statusmessage, rowcount, query, res = execute(module, cursor, query, args)
 
     # Check results
     assert statusmessage == 'blahblah'
@@ -117,3 +120,4 @@ def test_execute(sequence, expected):
     assert res == expected
     assert cursor.query == 'SELECT 1'
     assert cursor.args == (1, 2, 3)
+    assert query == ('SELECT 1', (1, 2, 3))

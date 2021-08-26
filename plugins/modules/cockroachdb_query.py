@@ -107,6 +107,7 @@ def execute(module, cursor, query, args):
     rowcount = None
     query_result = []
     try:
+        mogrified_query = cursor.mogrify(query, args)
         cursor.execute(query, args)
         statusmessage = cursor.statusmessage
         rowcount = cursor.rowcount
@@ -124,7 +125,7 @@ def execute(module, cursor, query, args):
     except Exception as e:
         module.fail_json(msg='Cannot execute query "%s": %s' % (query, to_native(e)))
 
-    return statusmessage, rowcount, query_result
+    return statusmessage, rowcount, mogrified_query, query_result
 
 
 def main():
@@ -157,8 +158,8 @@ def main():
     args = get_args(positional_args, named_args)
 
     # Execute query
-    statusmessage, rowcount, query_result = execute(module, conn, cursor,
-                                                    query, args)
+    statusmsg, rowcount, query, query_result = execute(module, conn, cursor,
+                                                       query, args)
 
     # Close cursor and conn
     try:
@@ -170,9 +171,10 @@ def main():
     # Users will get this in JSON output after execution
     kw = dict(
         changed=True,
-        statusmessage=statusmessage,
+        statusmessage=statusmsg,
         rowcount=rowcount,
         query_result=query_result,
+        query=query,
     )
 
     module.exit_json(**kw)
