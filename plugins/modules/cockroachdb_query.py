@@ -158,8 +158,7 @@ def main():
     args = get_args(positional_args, named_args)
 
     # Execute query
-    statusmsg, rowcount, query, query_result = execute(module, conn, cursor,
-                                                       query, args)
+    statusmsg, rowcount, query, query_result = execute(module, cursor, query, args)
 
     # Close cursor and conn
     try:
