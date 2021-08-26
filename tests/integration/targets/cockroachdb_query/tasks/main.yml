@@ -1,12 +1,34 @@
----
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
 
-- name: Check connection
-  cockroachdb_query:
-    ssl_mode: verify-full
-    ssl_root_cert: '{{ ssl_root_cert }}'
-    ssl_cert: '{{ ssl_cert }}'
-    ssl_key: '{{ ssl_key }}'
-    query: 'SELECT VERSION();'
+# Test code for mysql_info module
+# Copyright: (c) 2021, Andrew Klychkov (@Andersson007) <aaklychkov@mail.ru>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: For quick testing, remove later
-  meta: end_play
+- vars:
+    conn_parameters: &conn_params
+      ssl_mode: verify-full
+      ssl_root_cert: '{{ ssl_root_cert }}'
+      ssl_cert: '{{ ssl_cert }}'
+      ssl_key: '{{ ssl_key }}'
+    task_parameters: &task_params
+      register: result
+
+  block:
+
+  - name: Check connection
+    <<: *task_params
+    cockroachdb_query:
+      <<: *conn_params
+      query: 'SELECT VERSION()'
+
+  - name: Check
+    assert:
+      that:
+      - result is changed
+      - result.query == 'SELECT VERSION()'
+      - result.statusmessage == 'SELECT 1'
+      - result.rowcount == 1
+      - result.query_result.0.0 is search('CockroachDB')
