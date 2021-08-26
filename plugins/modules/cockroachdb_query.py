@@ -145,13 +145,14 @@ def main():
     )
 
     # Assign passed options to variables
-    query = module.params["query"]
-    positional_args = module.params["positional_args"]
-    named_args = module.params["named_args"]
+    query = module.params['query']
+    positional_args = module.params['positional_args']
+    named_args = module.params['named_args']
 
     # Connect to DB, get cursor
     cockroachdb = CockroachDB(module)
-    conn = cockroachdb.connect(conn_params=get_conn_params(module.params))
+    conn = cockroachdb.connect(conn_params=get_conn_params(module.params),
+                               autocommit=True)
     cursor = conn.cursor()
 
     # Prepare args:
