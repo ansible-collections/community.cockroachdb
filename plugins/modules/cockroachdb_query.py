@@ -66,6 +66,7 @@ def fetch_from_cursor(cursor):
         # An explicit conversion is required on the module's side.
         for i, elem in enumerate(row):
             if type(elem) in TYPES_NEED_TO_CONVERT:
+                row = list(row)
                 row[i] = convert_to_supported(elem)
 
         query_result.append(row)

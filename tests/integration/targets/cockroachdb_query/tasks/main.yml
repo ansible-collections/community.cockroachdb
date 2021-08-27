@@ -121,3 +121,27 @@
       - result.statusmessage == 'SELECT 2'
       - result.rowcount == 2
       - result.query_result == [[1, 'hello'], [2, 'bye']]
+
+
+  - name: Create table containing decimals and timedelta
+    <<: *task_params
+    cockroachdb_query:
+      <<: *conn_params
+      query: '{{ item }}'
+    loop:
+    - CREATE TABLE test_db.decimals_timedelta (dec numeric, ti interval)
+    - INSERT INTO test_db.decimals_timedelta (dec, ti) VALUES (1.01, '80 minutes'::interval)
+
+  - name: Fetch data from table containing decimals and timedelta
+    <<: *task_params
+    cockroachdb_query:
+      <<: *conn_params
+      query: SELECT * FROM test_db.decimals_timedelta
+
+  - name: Check
+    assert:
+      that:
+        - result is changed
+        - result.rowcount == 1
+        - result.statusmessage == 'SELECT 1'
+        - result.query_result == [[1.01, '1:20:00']]
