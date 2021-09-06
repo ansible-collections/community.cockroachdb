@@ -1,16 +1,114 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# Copyright: (c) 2021, Andrew Klychkov (@Andersson007) <aaklychkov@mail.ru>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-DOCUMENTATION = r''' # '''
+DOCUMENTATION = r'''
+---
+module: cockroachdb_query
 
-EXAMPLES = r''' # '''
+short_description: Run queries in a CockroachDB database
 
-RETURN = r''' # '''
+description:
+  - Runs arbitrary queries in a CockroachDB database.
+
+version_added: '0.1.0'
+
+author
+  - Andrew Klychkov (@Andersson007)
+
+extends_documentation_fragment:
+  - community.cockroachdb.cockroachdb_query
+
+notes:
+  - Does not support C(check_mode).
+
+options:
+  query:
+    description:
+    - SQL query to run. Variables can be escaped with psycopg2 syntax
+      U(http://initd.org/psycopg/docs/usage.html).
+    type: str
+
+  positional_args:
+    description:
+    - List of values to be passed as positional arguments to the query.
+    - Mutually exclusive with I(named_args).
+    type: list
+    elements: raw
+
+  named_args:
+    description:
+    - Dictionary of key-value arguments to pass to the query.
+    - Mutually exclusive with I(positional_args).
+    type: dict
+'''
+
+EXAMPLES = r'''
+- name: Run simple select query in acme db
+  community.cockroachdb.cockroachdb_query:
+    db: acme
+    query: SELECT version()
+  register: result
+
+- name: Print information returned from the previous task
+  ansible.builtin.debug:
+    var: result
+    verbosity: 2
+
+- name: Run query in acme db using positional args and non-default credentials
+  community.cockroachdb.cockroachdb_query:
+    db: acme
+    login_user: django
+    login_password: mysecretpass
+    query: SELECT * FROM acme WHERE id = %s AND story = %s
+    positional_args:
+    - 1
+    - test
+
+- name: Run query in test_db using named args
+  community.cockroachdb.cockroachdb_query:
+    db: test_db
+    query: SELECT * FROM test WHERE id = %(id_val)s AND story = %(story_val)s
+    named_args:
+      id_val: 1
+      story_val: test
+'''
+
+RETURN = r'''
+query:
+    description:
+    - Executed query containing substituted arguments.
+    returned: always
+    type: str
+    sample: 'SELECT * FROM bar'
+
+statusmessage:
+  description:
+    - Attribute containing the message returned by the command.
+  returned: always
+  type: str
+  sample: 'INSERT 0 1'
+
+query_result:
+  description:
+    - List of lists representing returned rows.
+  returned: always
+  type: list
+  elements: dict
+  sample: []
+
+rowcount:
+  description:
+    - Number of produced or affected rows.
+  returned: changed
+  type: int
+  sample: 5
+'''
 
 import datetime
 import decimal
