@@ -30,6 +30,7 @@ def common_argument_spec():
     The options are used by most of CockroachDB modules.
     """
     return dict(
+        login_db=dict(type='str'),
         login_user=dict(type='str', default='root'),
         login_password=dict(type='str', no_log=True),
         login_host=dict(type='str', default='localhost'),
@@ -115,6 +116,7 @@ def get_params_map():
     Returns dictionary.
     """
     return {
+        'login_db': 'database',
         'login_host': 'host',
         'login_user': 'user',
         'login_password': 'password',

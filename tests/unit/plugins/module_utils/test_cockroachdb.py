@@ -14,6 +14,7 @@ from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb 
 
 def test_common_argument_spec():
     EXPECTED = {
+        'login_db': {'type': 'str'},
         'login_port': {'default': 26257, 'type': 'int'},
         'login_user': {'default': 'root', 'type': 'str'},
         'login_host': {'default': 'localhost', 'type': 'str'},
@@ -41,6 +42,7 @@ def test_common_argument_spec():
 
 def test_get_params_map():
     EXPECTED = {
+        'login_db': 'database',
         'login_host': 'host',
         'login_user': 'user',
         'login_password': 'password',
@@ -59,6 +61,7 @@ def test_get_params_map():
     [
         (   # input dict
             {'login_host': 'localhost',
+             'login_db': 'test',
              'login_unix_socket': None,
              'login_user': 'root',
              'login_password': 'blah',
@@ -69,6 +72,7 @@ def test_get_params_map():
              'ssl_key': '/path'},
             # expected dict
             {'host': 'localhost',
+             'database': 'test',
              'user': 'root',
              'password': 'blah',
              'port': 1234,
