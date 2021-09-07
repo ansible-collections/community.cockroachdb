@@ -9,11 +9,15 @@ __metaclass__ = type
 class ModuleDocFragment(object):
     DOCUMENTATION = r'''
 options:
+  login_db:
+    description:
+      - Database name to connect to.
+    type: str
+
   login_user:
     description:
-      - The username used to connect to the database.
+      - User name used to connect to the database.
     type: str
-    default: postgres
 
   login_password:
     description:
@@ -24,6 +28,7 @@ options:
     description:
       - Host running the database.
     type: str
+    default: localhost
 
   login_unix_socket:
     description:
@@ -34,7 +39,7 @@ options:
     description:
       - Database port to connect to.
     type: int
-    default: 
+    default: 26257
 
   ssl_mode:
     description:
