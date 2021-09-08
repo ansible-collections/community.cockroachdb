@@ -90,7 +90,7 @@ class CockroachDB():
         ensure_required_libs(self.module)
 
         try:
-            self.connection = psycopg2.connect(**conn_params, cursor_factory=DictCursor)
+            self.connection = psycopg2.connect(cursor_factory=DictCursor, **conn_params)
             if autocommit:
                 if LooseVersion(psycopg2.__version__) >= LooseVersion('2.4.2'):
                     self.connection.set_session(autocommit=True)

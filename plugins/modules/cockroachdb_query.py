@@ -18,11 +18,11 @@ description:
 
 version_added: '0.1.0'
 
-author
+author:
   - Andrew Klychkov (@Andersson007)
 
 extends_documentation_fragment:
-  - community.cockroachdb.cockroachdb_query
+  - community.cockroachdb.cockroachdb
 
 notes:
   - Does not support C(check_mode).
@@ -165,7 +165,7 @@ def fetch_from_cursor(cursor):
         # An explicit conversion is required on the module's side.
         row = dict(row)
         for (key, val) in iteritems(row):
-            if type(val) in TYPES_NEED_TO_CONVERT:
+            if isinstance(val, TYPES_NEED_TO_CONVERT):
                 row[key] = convert_to_supported(val)
 
         query_result.append(row)

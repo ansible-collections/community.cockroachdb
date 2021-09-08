@@ -18,6 +18,7 @@ options:
     description:
       - User name used to connect to the database.
     type: str
+    default: root
 
   login_password:
     description:
