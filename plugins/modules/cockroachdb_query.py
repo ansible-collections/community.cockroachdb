@@ -96,11 +96,11 @@ statusmessage:
 
 query_result:
   description:
-    - List of lists representing returned rows.
+    - List of dicts representing returned rows.
   returned: always
   type: list
   elements: dict
-  sample: []
+  sample: [{"version": "CockroachDB CCL v21.1.6 (x86_64-unknown-linux-gnu, built 2021/07/20 15:30:39, go1.15.11)"}]
 
 rowcount:
   description:
@@ -123,6 +123,7 @@ except ImportError:
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils._text import to_native
+from ansible.module_utils.six import iteritems
 
 from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb import (
     common_argument_spec,
@@ -162,10 +163,10 @@ def fetch_from_cursor(cursor):
     for row in cursor:
         # Ansible engine does not support some types like decimals and timedelta.
         # An explicit conversion is required on the module's side.
-        for i, elem in enumerate(row):
-            if type(elem) in TYPES_NEED_TO_CONVERT:
-                row = list(row)
-                row[i] = convert_to_supported(elem)
+        row = dict(row)
+        for (key, val) in iteritems(row):
+            if type(val) in TYPES_NEED_TO_CONVERT:
+                row[key] = convert_to_supported(val)
 
         query_result.append(row)
 

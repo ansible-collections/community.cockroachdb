@@ -31,7 +31,7 @@
         - result.query == 'SELECT VERSION()'
         - result.statusmessage == 'SELECT 1'
         - result.rowcount == 1
-        - result.query_result.0.0 is search('CockroachDB')
+        - result.query_result.0.version is search('CockroachDB')
 
 
 
@@ -120,7 +120,10 @@
       - result.query == 'SELECT * FROM test_db.test_table'
       - result.statusmessage == 'SELECT 2'
       - result.rowcount == 2
-      - result.query_result == [[1, 'hello'], [2, 'bye']]
+      - result.query_result.0.id == 1
+      - result.query_result.0.story == 'hello'
+      - result.query_result.1.id == 2
+      - result.query_result.1.story == 'bye'
 
 
   - name: Create table containing decimals and timedelta
@@ -144,7 +147,8 @@
         - result is changed
         - result.rowcount == 1
         - result.statusmessage == 'SELECT 1'
-        - result.query_result == [[1.01, '1:20:00']]
+        - result.query_result.0.dec == 1.01
+        - result.query_result.0.ti == '1:20:00'
 
 
   - name: Connect to test DB directly and run query there

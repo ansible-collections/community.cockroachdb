@@ -13,6 +13,7 @@ __metaclass__ = type
 psycopg2 = None
 try:
     import psycopg2
+    from psycopg2.extras import DictCursor
     HAS_PSYCOPG2 = True
 except ImportError:
     HAS_PSYCOPG2 = False
@@ -89,7 +90,7 @@ class CockroachDB():
         ensure_required_libs(self.module)
 
         try:
-            self.connection = psycopg2.connect(**conn_params)
+            self.connection = psycopg2.connect(**conn_params, cursor_factory=DictCursor)
             if autocommit:
                 if LooseVersion(psycopg2.__version__) >= LooseVersion('2.4.2'):
                     self.connection.set_session(autocommit=True)
