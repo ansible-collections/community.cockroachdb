@@ -80,15 +80,21 @@ def test_fetch_from_cursor_dict(input_, expected):
     assert fetch_from_cursor_dict(input_) == expected
 
 
-@pytest.mark.parametrize('sequence,expected', [
-    ([('first value', timedelta(0, 43200))], [('first value', '12:00:00')]),
-    ([(1, Decimal('1.01'))], [(1, 1.01)]),
-    ([('string')], [('string')]),
-    ([(None)], [(None)]),
-    ([(1), (2), (1, Decimal('1.01'))], [(1), (2), (1, 1.01)]),
-    ([(1), (2)], [(1), (2)]),
+@pytest.mark.parametrize('sequence,expected,fetch_func', [
+    ([('first value', timedelta(0, 43200))], [('first value', '12:00:00')], fetch_from_cursor_tuple),
+    ([(1, Decimal('1.01'))], [(1, 1.01)], fetch_from_cursor_tuple),
+    ([('string')], [('string')], fetch_from_cursor_tuple),
+    ([(None)], [(None)], fetch_from_cursor_tuple),
+    ([(1), (2), (1, Decimal('1.01'))], [(1), (2), (1, 1.01)], fetch_from_cursor_tuple),
+    ([(1), (2)], [(1), (2)], fetch_from_cursor_tuple),
+    ([{1: 'first value', 2: timedelta(0, 43200)}], [{1: 'first value', 2: '12:00:00'}], fetch_from_cursor_dict),
+    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01)}, fetch_from_cursor_dict),
+    ([{1: 'string'}], [{2: 'string'}], fetch_from_cursor_dict),
+    ([{1: None}], [{2: None}], fetch_from_cursor_dict),
+    ([{1: 1}, {2: 2}, {1: 1, 2: Decimal('1.01')}], [{1: 1}, {2: 2}, {1: 1, 2: 1.01}], fetch_from_cursor_dict),
+    ([{1: 1}, {2: 2}], [{1: 1}, {2: 2}], fetch_from_cursor_dict),
 ])
-def test_execute(sequence, expected):
+def test_execute(sequence, expected, fetch_func):
     # The execute function invokes a passed fetch_from_cursor function
     # that, in turn, invokes the convert_to_supported function
     # to handle fetched from cursor elements when deeded.
@@ -132,7 +138,7 @@ def test_execute(sequence, expected):
 
     # Invoke the function
     statusmessage, rowcount, query, res = execute(module, cursor,
-                                                  query, args, fetch_from_cursor_tuple)
+                                                  query, args, fetch_func)
 
     # Check results
     assert statusmessage == 'blahblah'
