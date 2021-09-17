@@ -11,6 +11,7 @@ import pytest
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_query import (
     convert_to_supported,
     execute,
+    fetch_from_cursor_dict,
     fetch_from_cursor_tuple,
     get_args,
 )
@@ -59,6 +60,24 @@ def test_fetch_from_cursor_tuple(input_, expected):
     # function covered above to convert elements
     # of not supported types to appropriate ones.
     assert fetch_from_cursor_tuple(input_) == expected
+
+
+@pytest.mark.parametrize('input_, expected', [
+    ([{1: 'first value', 2: timedelta(0, 43200)}], [{1: 'first value', 2: '12:00:00'}]),
+    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01)}),
+    ([{1: 'string'}], [{2: 'string'}]),
+    ([{1: None}], [{2: None}]),
+    ([{1: 1}, {2: 2}, {1: 1, 2: Decimal('1.01')}], [{1: 1}, {2: 2}, {1: 1, 2: 1.01}]),
+    ([{1: 1}, {2: 2}], [{1: 1}, {2: 2}]),
+])
+def test_fetch_from_cursor_dict(input_, expected):
+    # fetch_from_cursor_dict function requires an argument
+    # of psycopg2 cursor class. In the context
+    # of the function, it works as iterator, so we're
+    # passing lists as input_. It invokes cover_to_support
+    # function covered above to convert elements
+    # of not supported types to appropriate ones.
+    assert fetch_from_cursor_dict(input_) == expected
 
 
 @pytest.mark.parametrize('sequence,expected', [
