@@ -221,7 +221,7 @@ def get_args(positional_args, named_args):
         return None
 
 
-def execute(module, cursor, query, args, fetch_func):
+def execute(module, cursor, query, args, fetch_from_cursor):
     """Execute query in CockroachDB database.
 
     Args:
@@ -229,7 +229,7 @@ def execute(module, cursor, query, args, fetch_func):
         cursor (cursor): Cursor object of a database Python connector.
         query (str) -- Query to execute.
         args (dict|tuple) -- Data structure to pass to cursor.execute as query parameters.
-        fetch_func (function) -- Function to fetch rows from cursor.
+        fetch_from_cursor (function) -- Function to fetch rows from cursor.
 
     Returns a tuple (
         statusmessage (str) -- Status message returned by psycopg2, for example, "SELECT 1".
@@ -247,7 +247,7 @@ def execute(module, cursor, query, args, fetch_func):
         rowcount = cursor.rowcount
 
         try:
-            query_result = fetch_func(cursor)
+            query_result = fetch_from_cursor(cursor)
 
         except Psycopg2ProgrammingError as e:
             if to_native(e) == 'no results to fetch':
@@ -289,9 +289,9 @@ def main():
     cockroachdb = CockroachDB(module)
 
     if rows_type == 'dict':
-        fetch_func = fetch_from_cursor_dict
+        fetch_from_cursor = fetch_from_cursor_dict
     else:
-        fetch_func = fetch_from_cursor_tuple
+        fetch_from_cursor = fetch_from_cursor_tuple
 
     conn = cockroachdb.connect(conn_params=get_conn_params(module.params),
                                autocommit=True, rows_type=rows_type)
@@ -302,7 +302,7 @@ def main():
 
     # Execute query
     statusmsg, rowcount, query, query_result = execute(module, cursor, query,
-                                                       args, fetch_func)
+                                                       args, fetch_from_cursor)
 
     # Close cursor and conn
     try:
