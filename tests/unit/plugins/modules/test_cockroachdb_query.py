@@ -11,7 +11,7 @@ import pytest
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_query import (
     convert_to_supported,
     execute,
-    fetch_from_cursor,
+    fetch_from_cursor_tuple,
     get_args,
 )
 
@@ -44,33 +44,33 @@ def test_convert_to_supported(input_, expected):
 
 
 @pytest.mark.parametrize('input_, expected', [
-    ([['first value', timedelta(0, 43200)]], [['first value', '12:00:00']]),
-    ([[1, Decimal('1.01')]], [[1, 1.01]]),
-    ([['string']], [['string']]),
-    ([[None]], [[None]]),
-    ([[1], [2], [1, Decimal('1.01')]], [[1], [2], [1, 1.01]]),
-    ([[1], [2]], [[1], [2]]),
+    ([('first value', timedelta(0, 43200))], [('first value', '12:00:00')]),
+    ([(1, Decimal('1.01'))], [(1, 1.01)]),
+    ([('string')], [('string')]),
+    ([(None)], [(None)]),
+    ([(1), (2), (1, Decimal('1.01'))], [(1), (2), (1, 1.01)]),
+    ([(1), (2)], [(1), (2)]),
 ])
-def test_fetch_from_cursor(input_, expected):
-    # fetch_from_cursor function requires an argument
+def test_fetch_from_cursor_tuple(input_, expected):
+    # fetch_from_cursor_tuple function requires an argument
     # of psycopg2 cursor class. In the context
     # of the function, it works as iterator, so we're
-    # passing list as input_. It invokes cover_to_support
-    # function covered above to convert element
+    # passing lists as input_. It invokes cover_to_support
+    # function covered above to convert elements
     # of not supported types to appropriate ones.
-    assert fetch_from_cursor(input_) == expected
+    assert fetch_from_cursor_tuple(input_) == expected
 
 
 @pytest.mark.parametrize('sequence,expected', [
-    ([['first value', timedelta(0, 43200)]], [['first value', '12:00:00']]),
-    ([[1, Decimal('1.01')]], [[1, 1.01]]),
-    ([['string']], [['string']]),
-    ([[None]], [[None]]),
-    ([[1], [2], [1, Decimal('1.01')]], [[1], [2], [1, 1.01]]),
-    ([[1], [2]], [[1], [2]]),
+    ([('first value', timedelta(0, 43200))], [('first value', '12:00:00')]),
+    ([(1, Decimal('1.01'))], [(1, 1.01)]),
+    ([('string')], [('string')]),
+    ([(None)], [(None)]),
+    ([(1), (2), (1, Decimal('1.01'))], [(1), (2), (1, 1.01)]),
+    ([(1), (2)], [(1), (2)]),
 ])
 def test_execute(sequence, expected):
-    # The execute function invokes the fetch_from_cursor function
+    # The execute function invokes a passed fetch_from_cursor function
     # that, in turn, invokes the convert_to_supported function
     # to handle fetched from cursor elements when deeded.
     # So we expect that unsupported elements will be converted,
@@ -112,7 +112,8 @@ def test_execute(sequence, expected):
     args = (1, 2, 3)
 
     # Invoke the function
-    statusmessage, rowcount, query, res = execute(module, cursor, query, args)
+    statusmessage, rowcount, query, res = execute(module, cursor,
+                                                  query, args, fetch_from_cursor_tuple)
 
     # Check results
     assert statusmessage == 'blahblah'

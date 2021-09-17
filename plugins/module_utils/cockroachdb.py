@@ -75,7 +75,7 @@ class CockroachDB():
         self.module = module
         self.connection = None
 
-    def connect(self, conn_params, autocommit=False, fail_on_conn=True):
+    def connect(self, conn_params, autocommit=False, fail_on_conn=True, rows_type='dict'):
         """Connect to a CockroachDB database.
 
         Return psycopg2 connection object.
@@ -86,11 +86,17 @@ class CockroachDB():
         Kwargs:
             autocommit (bool) -- commit automatically (default False)
             fail_on_conn (bool) -- fail if connection failed or just warn and return None (default True)
+            rows_type (str) -- specifies rows of which type to return
         """
         ensure_required_libs(self.module)
 
+        if rows_type == 'dict':
+            cursor_factory = DictCursor
+        else:
+            cursor_factory = None
+
         try:
-            self.connection = psycopg2.connect(cursor_factory=DictCursor, **conn_params)
+            self.connection = psycopg2.connect(cursor_factory=cursor_factory, **conn_params)
             if autocommit:
                 if LooseVersion(psycopg2.__version__) >= LooseVersion('2.4.2'):
                     self.connection.set_session(autocommit=True)

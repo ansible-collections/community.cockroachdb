@@ -30,22 +30,31 @@ notes:
 options:
   query:
     description:
-    - SQL query to run. Variables can be escaped with psycopg2 syntax
-      U(http://initd.org/psycopg/docs/usage.html).
+      - SQL query to run. Variables can be escaped with psycopg2 syntax
+        U(http://initd.org/psycopg/docs/usage.html).
     type: str
 
   positional_args:
     description:
-    - List of values to be passed as positional arguments to the query.
-    - Mutually exclusive with I(named_args).
+      - List of values to be passed as positional arguments to the query.
+      - Mutually exclusive with I(named_args).
     type: list
     elements: raw
 
   named_args:
     description:
-    - Dictionary of key-value arguments to pass to the query.
-    - Mutually exclusive with I(positional_args).
+      - Dictionary of key-value arguments to pass to the query.
+      - Mutually exclusive with I(positional_args).
     type: dict
+
+  rows_type:
+    description:
+      - If set to C(tuple), rows in the I(query_result)
+        return value will be of the tuple type.
+      - Returns dictionaries by default.
+    type: str
+    choises: [dict, tuple]
+    default: dict
 '''
 
 EXAMPLES = r'''
@@ -97,6 +106,7 @@ statusmessage:
 query_result:
   description:
     - List of dicts representing returned rows.
+      When the I(rows_type) option is set to C(tuple), it will consist of tuples.
   returned: always
   type: list
   elements: dict
@@ -151,22 +161,45 @@ def convert_to_supported(val):
     return val  # By default returns the same value
 
 
-def fetch_from_cursor(cursor):
+def fetch_from_cursor_dict(cursor):
     """Fetch rows from cursor handling unsupported types.
 
     Args:
         cursor (cursor): Cursor object of a database Python connector.
 
-    Returns query_result list.
+    Returns query_result list containing dictionaries.
     """
     query_result = []
     for row in cursor:
         # Ansible engine does not support some types like decimals and timedelta.
         # An explicit conversion is required on the module's side.
         row = dict(row)
-        for (key, val) in iteritems(row):
+        for key, val in iteritems(row):
             if isinstance(val, TYPES_NEED_TO_CONVERT):
                 row[key] = convert_to_supported(val)
+
+        query_result.append(row)
+
+    return query_result
+
+
+def fetch_from_cursor_tuple(cursor):
+    """Fetch rows from cursor handling unsupported types.
+
+    Args:
+        cursor (cursor): Cursor object of a database Python connector.
+
+    Returns query_result list containing tuples.
+    """
+    query_result = []
+    for row in cursor:
+        # Ansible engine does not support some types like decimals and timedelta.
+        # An explicit conversion is required on the module's side.
+        for i, val in enumerate(row):
+            if isinstance(val, TYPES_NEED_TO_CONVERT):
+                row = list(row)
+                row[i] = convert_to_supported(val)
+                row = tuple(row)
 
         query_result.append(row)
 
@@ -188,7 +221,7 @@ def get_args(positional_args, named_args):
         return None
 
 
-def execute(module, cursor, query, args):
+def execute(module, cursor, query, args, fetch_func):
     """Execute query in CockroachDB database.
 
     Args:
@@ -196,6 +229,7 @@ def execute(module, cursor, query, args):
         cursor (cursor): Cursor object of a database Python connector.
         query (str) -- Query to execute.
         args (dict|tuple) -- Data structure to pass to cursor.execute as query parameters.
+        fetch_func (function) -- Function to fetch rows from cursor.
 
     Returns a tuple (
         statusmessage (str) -- Status message returned by psycopg2, for example, "SELECT 1".
@@ -213,7 +247,7 @@ def execute(module, cursor, query, args):
         rowcount = cursor.rowcount
 
         try:
-            query_result = fetch_from_cursor(cursor)
+            query_result = fetch_func(cursor)
 
         except Psycopg2ProgrammingError as e:
             if to_native(e) == 'no results to fetch':
@@ -235,6 +269,7 @@ def main():
         query=dict(type='str'),
         positional_args=dict(type='list', elements='raw'),
         named_args=dict(type='dict'),
+        rows_type=dict(type='str', choises=['dict', 'tuple'], default='dict'),
     )
 
     # Instantiate an object of module class
@@ -248,18 +283,26 @@ def main():
     query = module.params['query']
     positional_args = module.params['positional_args']
     named_args = module.params['named_args']
+    rows_type = module.params['rows_type']
 
     # Connect to DB, get cursor
     cockroachdb = CockroachDB(module)
+
+    if rows_type == 'dict':
+        fetch_func = fetch_from_cursor_dict
+    else:
+        fetch_func = fetch_from_cursor_tuple
+
     conn = cockroachdb.connect(conn_params=get_conn_params(module.params),
-                               autocommit=True)
+                               autocommit=True, rows_type=rows_type)
     cursor = conn.cursor()
 
     # Prepare args:
     args = get_args(positional_args, named_args)
 
     # Execute query
-    statusmsg, rowcount, query, query_result = execute(module, cursor, query, args)
+    statusmsg, rowcount, query, query_result = execute(module, cursor, query,
+                                                       args, fetch_func)
 
     # Close cursor and conn
     try:
