@@ -69,6 +69,15 @@ EXAMPLES = r'''
     var: result
     verbosity: 2
 
+- name: The same task as above but with using SSL parameters
+  community.cockroachdb.cockroachdb_query:
+    ssl_mode: verify-full
+    ssl_root_cert: /tmp/certs/ca.crt
+    ssl_cert: /tmp/certs/client.root.crt
+    ssl_key: /tmp/certs/client.root.key
+    query: 'SELECT VERSION()'
+  register: result
+
 - name: Run query in acme db using positional args and non-default credentials
   community.cockroachdb.cockroachdb_query:
     db: acme
