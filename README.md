@@ -1,13 +1,5 @@
 # [WORK IN PROGRESS] CockroachDB collection for Ansible
 
-TODO:
-
-- Figure out if something related to Galaxy needs to be done.
-- Setup GHA CI after merging this [PR](https://github.com/ansible/ansible/pull/75498).
-- Add to Zuul to publish on Galaxy.
-- Add CI badges after.
-- Reach out to CockroachDB communities.
-
 ## Code of Conduct
 
 We follow the [Ansible Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html) in all our interactions within this project.
