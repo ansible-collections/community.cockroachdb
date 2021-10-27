@@ -64,7 +64,7 @@ def test_fetch_from_cursor_tuple(input_, expected):
 
 @pytest.mark.parametrize('input_, expected', [
     ([{1: 'first value', 2: timedelta(0, 43200)}], [{1: 'first value', 2: '12:00:00'}]),
-    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01}),
+    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01}]),
     ([{1: 'string'}], [{2: 'string'}]),
     ([{1: None}], [{2: None}]),
     ([{1: 1}, {2: 2}, {1: 1, 2: Decimal('1.01')}], [{1: 1}, {2: 2}, {1: 1, 2: 1.01}]),
