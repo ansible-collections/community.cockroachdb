@@ -53,7 +53,7 @@ options:
         return value will be of the tuple type.
       - Returns dictionaries by default.
     type: str
-    choises: [dict, tuple]
+    choices: [dict, tuple]
     default: dict
 '''
 
@@ -269,7 +269,7 @@ def main():
         query=dict(type='str'),
         positional_args=dict(type='list', elements='raw'),
         named_args=dict(type='dict'),
-        rows_type=dict(type='str', choises=['dict', 'tuple'], default='dict'),
+        rows_type=dict(type='str', choices=['dict', 'tuple'], default='dict'),
     )
 
     # Instantiate an object of module class
