@@ -88,7 +88,7 @@ def test_fetch_from_cursor_dict(input_, expected):
     ([(1), (2), (1, Decimal('1.01'))], [(1), (2), (1, 1.01)], fetch_from_cursor_tuple),
     ([(1), (2)], [(1), (2)], fetch_from_cursor_tuple),
     ([{1: 'first value', 2: timedelta(0, 43200)}], [{1: 'first value', 2: '12:00:00'}], fetch_from_cursor_dict),
-    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01)}, fetch_from_cursor_dict),
+    ([{1: 1, 2: Decimal('1.01')}], [{1: 1, 2: 1.01}], fetch_from_cursor_dict),
     ([{1: 'string'}], [{2: 'string'}], fetch_from_cursor_dict),
     ([{1: None}], [{2: None}], fetch_from_cursor_dict),
     ([{1: 1}, {2: 2}, {1: 1, 2: Decimal('1.01')}], [{1: 1}, {2: 2}, {1: 1, 2: 1.01}], fetch_from_cursor_dict),
