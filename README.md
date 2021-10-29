@@ -1,4 +1,6 @@
-# [WORK IN PROGRESS] CockroachDB collection for Ansible
+# CockroachDB collection for Ansible
+
+[![Plugins CI](https://github.com/ansible-collections/community.cockroachdb/workflows/Plugins%20CI/badge.svg?event=push)](https://github.com/ansible-collections/community.cockroachdb/actions?query=workflow%3A"Plugins+CI") [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cockroachdb)](https://codecov.io/gh/ansible-collections/community.cockroachdb)
 
 ## Code of Conduct
 
@@ -52,7 +54,7 @@ Every voice is important and every idea is valuable. If you have something on yo
 
 ## Tested with Ansible
 
-- devel
+- devel and Python 3.8
 
 ## External requirements
 
