@@ -88,40 +88,39 @@ jobs:
         with:
           fail_ci_if_error: false
 
-# Uncomment after https://github.com/ansible/ansible/pull/75498 gets merged
-#  integration:
-#    name: "Integration (Python: ${{ matrix.python }}, Ansible: ${{ matrix.ansible }}"
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        ansible:
-#          - devel
-#        python:
-#          - 3.8
-#    steps:
+  integration:
+    name: "Integration (Python: ${{ matrix.python }}, Ansible: ${{ matrix.ansible }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible:
+          - devel
+        python:
+          - 3.8
+    steps:
 
-#      - name: Check out code
-#        uses: actions/checkout@v2
-#        with:
-#          path: ansible_collections/community/cockroachdb
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cockroachdb
 
-#      - name: Set up Python
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.8
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-#      - name: Install ansible-base (${{ matrix.ansible }})
-#        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+      - name: Install ansible-base (${{ matrix.ansible }})
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
 
-#      - name: Run integration tests
-#        run: ansible-test integration --docker ubuntu2004 -v --color --retry-on-error --continue-on-error --python ${{ matrix.python }} --diff --coverage
-#        working-directory: ./ansible_collections/community/cockroachdb
+      - name: Run integration tests
+        run: ansible-test integration --docker ubuntu2004 -v --color --retry-on-error --continue-on-error --python ${{ matrix.python }} --diff --coverage
+        working-directory: ./ansible_collections/community/cockroachdb
 
-#      - name: Generate coverage report.
-#        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-#        working-directory: ./ansible_collections/community/cockroachdb
+      - name: Generate coverage report.
+        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+        working-directory: ./ansible_collections/community/cockroachdb
 
-#      - uses: codecov/codecov-action@v1
-#        with:
-#          fail_ci_if_error: false
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
