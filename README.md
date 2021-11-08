@@ -108,6 +108,15 @@ See [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_gui
   ansible.builtin.debug:
     var: result
     verbosity: 2
+
+- name: Assert the result
+  assert:
+    that:
+      - result is changed
+      - result.query == 'SELECT VERSION()'
+      - result.statusmessage == 'SELECT 1'
+      - result.rowcount == 1
+      - result.query_result.0.version == 'CockroachDB CCL v21.1.6'
 ```
 
 ## Licensing
