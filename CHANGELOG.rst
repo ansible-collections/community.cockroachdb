@@ -1,6 +1,6 @@
-====================================================
-CHANGE THIS IN changelogs/config.yaml! Release Notes
-====================================================
+==============================================
+Community CockroachDB Collection Release Notes
+==============================================
 
 .. contents:: Topics
 
