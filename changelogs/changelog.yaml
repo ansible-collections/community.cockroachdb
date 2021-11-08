@@ -1,1 +1,13 @@
-releases: {}
+ancestor: null
+releases:
+  0.1.0:
+    changes:
+      release_summary: This is the first release of the ``community.cockroachdb``
+        collection.
+    fragments:
+    - 0.1.0.yml
+    modules:
+    - description: Run queries in a CockroachDB database
+      name: cockroachdb_query
+      namespace: ''
+    release_date: '2021-11-08'
