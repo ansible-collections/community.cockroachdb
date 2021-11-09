@@ -1,0 +1,51 @@
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+# Test code for cockroachdb_info module
+# Copyright: (c) 2021, Andrew Klychkov (@Andersson007) <aaklychkov@mail.ru>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- vars:
+    conn_parameters: &conn_params
+      ssl_mode: verify-full
+      ssl_root_cert: '{{ ssl_root_cert }}'
+      ssl_cert: '{{ ssl_cert }}'
+      ssl_key: '{{ ssl_key }}'
+    task_parameters: &task_params
+      register: result
+
+  block:
+
+  - name: Fetch server info
+    <<: *task_params
+    cockroachdb_info:
+      <<: *conn_params
+
+  - name: Check
+    assert:
+      that:
+        - result is not changed
+        - result.version.raw is search('CockroachDB')
+        - result.version.year >= 20
+        - result.version.release > 0
+        - result.version.release < 5
+        - result.version.patch >= 0
+
+
+  - name: Fetch server info in check_mode
+    <<: *task_params
+    cockroachdb_info:
+      <<: *conn_params
+    check_mode: yes
+
+  - name: Check
+    assert:
+      that:
+        - result is not changed
+        - result.version.raw is search('CockroachDB')
+        - result.version.year >= 20
+        - result.version.release > 0
+        - result.version.release < 5
+        - result.version.patch >= 0
