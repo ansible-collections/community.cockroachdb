@@ -60,7 +60,7 @@ options:
 EXAMPLES = r'''
 - name: Run simple select query in acme db
   community.cockroachdb.cockroachdb_query:
-    db: acme
+    login_db: acme
     query: SELECT version()
   register: result
 
@@ -69,9 +69,20 @@ EXAMPLES = r'''
     var: result
     verbosity: 2
 
+- name: Run simple select query in acme db in the verify-full SSL mode
+  community.cockroachdb.cockroachdb_query:
+    login_host: 192.168.0.10
+    login_db: acme
+    query: SELECT version()
+    ssl_mode: verify-full
+    ssl_root_cert: /tmp/certs/ca.crt
+    ssl_cert: /tmp/certs/client.root.crt
+    ssl_key: /tmp/certs/client.root.key
+  register: result
+
 - name: Run query in acme db using positional args and non-default credentials
   community.cockroachdb.cockroachdb_query:
-    db: acme
+    login_db: acme
     login_user: django
     login_password: mysecretpass
     query: SELECT * FROM acme WHERE id = %s AND story = %s
@@ -81,7 +92,7 @@ EXAMPLES = r'''
 
 - name: Run query in test_db using named args
   community.cockroachdb.cockroachdb_query:
-    db: test_db
+    login_db: test_db
     query: SELECT * FROM test WHERE id = %(id_val)s AND story = %(story_val)s
     named_args:
       id_val: 1
