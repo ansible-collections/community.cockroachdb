@@ -316,11 +316,8 @@ def main():
                                                        args, fetch_from_cursor)
 
     # Close cursor and conn
-    try:
-        cursor.close()
-        conn.close()
-    except Exception:
-        pass
+    cursor.close()
+    conn.close()
 
     # Users will get this in JSON output after execution
     kw = dict(
