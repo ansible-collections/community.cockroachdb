@@ -5,6 +5,7 @@ __metaclass__ = type
 
 import pytest
 
+from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_info import (
     exec_query,
     extract_server_ver,
@@ -45,7 +46,11 @@ def test_extract_server_ver_fail_cases(_input, expected):
     assert extract_server_ver(_input) == expected
 
 
-def test_exec_query():
+class Cursor():
+    pass
+
+
+def test_exec_query(monkeypatch):
     class Cursor():
         """Fake cursor class"""
         # These are fake results that the cursor will
@@ -59,27 +64,27 @@ def test_exec_query():
         def fetchall(self):
             return True
 
-    class Module():
-        """Fake module class"""
+    def mock__init__(self):
         pass
 
-    module = Module()
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    module = AnsibleModule()
     cursor = Cursor()
     query = 'SELECT VERSION()'
 
-    assert exec_query(module, cursor, query) == True
+    assert exec_query(module, cursor, query) is True
 
 
-class Module():
-    """Fake module class"""
-    def __init__(self):
-        self.fail_msg = None
+# Method for monkeypatching AnsibleModule.__init__ method
+def mock__init__(self):
+    self.fail_msg = None
 
-    def fail_json(self, msg):
-        self.fail_msg = msg
+# Method for monkeypatching AnsibleModule.fail_json method
+def mock_fail_json(self, msg):
+    self.fail_msg = msg
 
 
-def test_exec_query_fail_execute():
+def test_exec_query_fail_execute(monkeypatch):
     class Cursor():
         """Fake cursor class"""
         def __init__(self):
@@ -91,7 +96,10 @@ def test_exec_query_fail_execute():
         def fetchall(self):
             pass
 
-    module = Module()
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+    module = AnsibleModule()
+
     cursor = Cursor()
     query = 'SELECT VERSION()'
 
@@ -101,7 +109,7 @@ def test_exec_query_fail_execute():
                                'Fake cursor.execute() failing.')
 
 
-def test_exec_query_fail_fetchall():
+def test_exec_query_fail_fetchall(monkeypatch):
     class Cursor():
         """Fake cursor class"""
         def __init__(self):
@@ -113,7 +121,10 @@ def test_exec_query_fail_fetchall():
         def fetchall(self):
             raise ValueError('Fake cursor.fetchall() failing.')
 
-    module = Module()
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+    module = AnsibleModule()
+
     cursor = Cursor()
     query = 'SELECT VERSION()'
 
