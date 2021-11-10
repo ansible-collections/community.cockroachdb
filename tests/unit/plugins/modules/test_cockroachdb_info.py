@@ -46,27 +46,27 @@ def test_extract_server_ver_fail_cases(_input, expected):
     assert extract_server_ver(_input) == expected
 
 
+# Installing, importing and monkeypatching psycopg2.Cursor
+# would be an extra thing here, so I'll use a dummy class
 class Cursor():
-    pass
+    def __init__(self):
+        self.query = None
+
+    def execute(self, query):
+        pass
+
+    def fetchall(self):
+        pass
 
 
 def test_exec_query(monkeypatch):
-    class Cursor():
-        """Fake cursor class"""
-        # These are fake results that the cursor will
-        # return when iterating through it
-        def __init__(self):
-            self.query = None
-
-        def execute(self, query):
-            self.query = query
-
-        def fetchall(self):
-            return True
+    def mock_fetchall(self):
+        return True
 
     def mock__init__(self):
         pass
 
+    monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     module = AnsibleModule()
     cursor = Cursor()
@@ -79,23 +79,17 @@ def test_exec_query(monkeypatch):
 def mock__init__(self):
     self.fail_msg = None
 
+
 # Method for monkeypatching AnsibleModule.fail_json method
 def mock_fail_json(self, msg):
     self.fail_msg = msg
 
 
 def test_exec_query_fail_execute(monkeypatch):
-    class Cursor():
-        """Fake cursor class"""
-        def __init__(self):
-            self.query = None
+    def mock_execute(self, query):
+        raise ValueError('Fake cursor.execute() failing.')
 
-        def execute(self, query):
-            raise ValueError('Fake cursor.execute() failing.')
-
-        def fetchall(self):
-            pass
-
+    monkeypatch.setattr(Cursor, 'execute', mock_execute)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
     module = AnsibleModule()
@@ -110,17 +104,10 @@ def test_exec_query_fail_execute(monkeypatch):
 
 
 def test_exec_query_fail_fetchall(monkeypatch):
-    class Cursor():
-        """Fake cursor class"""
-        def __init__(self):
-            self.query = None
+    def mock_fetchall(self):
+        raise ValueError('Fake cursor.fetchall() failing.')
 
-        def execute(self, query):
-            pass
-
-        def fetchall(self):
-            raise ValueError('Fake cursor.fetchall() failing.')
-
+    monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
     module = AnsibleModule()
