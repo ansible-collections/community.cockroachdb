@@ -33,15 +33,6 @@
     - '{{ cockroachdb_full_version }}/lib/libgeos.so'
     - '{{ cockroachdb_full_version }}/lib/libgeos_c.so'
 
-- name: Start a temporary, in-memory cluster to check
-  shell: cockroach demo --execute="SELECT ST_IsValid(ST_MakePoint(1,2));"
-  register: result
-
-- name: Check that the command returns what's expected
-  assert:
-    that:
-      - result.stdout == 'st_isvalid\ntrue'
-
 - name: Copy systemd config
   copy:
     src: service.conf
