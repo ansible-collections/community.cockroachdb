@@ -139,11 +139,8 @@ def main():
     server_info['version'] = get_server_version(module, cursor)
 
     # Close cursor and conn
-    try:
-        cursor.close()
-        conn.close()
-    except Exception:
-        pass
+    cursor.close()
+    conn.close()
 
     module.exit_json(changed=False, **server_info)
 
