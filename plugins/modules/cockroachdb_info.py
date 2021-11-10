@@ -69,6 +69,13 @@ from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb 
 
 
 def exec_query(module, cursor, query):
+    """Execute a query and return a list of fetched rows.
+
+    The module argument is an Ansible module object.
+    Within this function it's used to tell Ansible
+    that we want the task to fail and show a user a certain error message.
+    """
+
     try:
         cursor.execute(query)
     except Exception as e:
@@ -84,6 +91,20 @@ def exec_query(module, cursor, query):
 
 
 def extract_server_ver(ver_str):
+    """Take version string and return version dictionary.
+
+    The ver_str argument can look like 'CockroachDB CCL v21.1.6 ...'.
+    The function extracts values from the argument and return a dictionary.
+
+    Example of return value:
+    {
+        'raw': 'CockroachDB CCL v21.1.6 ...',
+        'year': 21,
+        'release': 1,
+        'patch': 6,
+    }
+    """
+
     version_info = {}
     version_info['raw'] = ver_str
 
@@ -100,6 +121,20 @@ def extract_server_ver(ver_str):
 
 
 def get_server_version(module, cursor):
+    """Get a server version from a server and return version dict.
+
+    The module argument is an Ansible module object.
+    Within this function it's used to tell Ansible
+    that we want the task to fail and show a user a certain error message.
+
+    Example of return value:
+    {
+        'raw': 'CockroachDB CCL v21.1.6 ...',
+        'year': 21,
+        'release': 1,
+        'patch': 6,
+    }
+    """
     res = exec_query(module, cursor, 'SELECT VERSION()')
 
     v_info, ok = extract_server_ver(res[0][0])
