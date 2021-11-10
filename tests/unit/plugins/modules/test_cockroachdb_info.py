@@ -43,3 +43,81 @@ def test_extract_server_ver(_input, expected):
 ])
 def test_extract_server_ver_fail_cases(_input, expected):
     assert extract_server_ver(_input) == expected
+
+
+def test_exec_query():
+    class Cursor():
+        """Fake cursor class"""
+        # These are fake results that the cursor will
+        # return when iterating through it
+        def __init__(self):
+            self.query = None
+
+        def execute(self, query):
+            self.query = query
+
+        def fetchall(self):
+            return True
+
+    class Module():
+        """Fake module class"""
+        pass
+
+    module = Module()
+    cursor = Cursor()
+    query = 'SELECT VERSION()'
+
+    assert exec_query(module, cursor, query) == True
+
+
+class Module():
+    """Fake module class"""
+    def __init__(self):
+        self.fail_msg = None
+
+    def fail_json(self, msg):
+        self.fail_msg = msg
+
+
+def test_exec_query_fail_execute():
+    class Cursor():
+        """Fake cursor class"""
+        def __init__(self):
+            self.query = None
+
+        def execute(self, query):
+            raise ValueError('Fake cursor.execute() failing.')
+
+        def fetchall(self):
+            pass
+
+    module = Module()
+    cursor = Cursor()
+    query = 'SELECT VERSION()'
+
+    exec_query(module, cursor, query)
+
+    assert module.fail_msg == ('Failed to execute query "SELECT VERSION()": '
+                               'Fake cursor.execute() failing.')
+
+
+def test_exec_query_fail_fetchall():
+    class Cursor():
+        """Fake cursor class"""
+        def __init__(self):
+            self.query = None
+
+        def execute(self, query):
+            pass
+
+        def fetchall(self):
+            raise ValueError('Fake cursor.fetchall() failing.')
+
+    module = Module()
+    cursor = Cursor()
+    query = 'SELECT VERSION()'
+
+    exec_query(module, cursor, query)
+
+    assert module.fail_msg == ('Failed to fetch rows for query "SELECT VERSION()" '
+                               'from cursor: Fake cursor.fetchall() failing.')

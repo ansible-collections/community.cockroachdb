@@ -75,6 +75,7 @@ def exec_query(module, cursor, query):
     Within this function it's used to tell Ansible
     that we want the task to fail and show a user a certain error message.
     """
+    res = None
 
     try:
         cursor.execute(query)
