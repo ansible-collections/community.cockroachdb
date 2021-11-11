@@ -60,15 +60,14 @@ class Cursor():
         pass
 
 
+def raise_(ex):
+    """Universal raiser needed for lambdas."""
+    raise ex
+
+
 def test_exec_query(monkeypatch):
-    def mock_fetchall(self):
-        return True
-
-    def mock__init__(self):
-        pass
-
-    monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
-    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(Cursor, 'fetchall', lambda self: True)
+    monkeypatch.setattr(AnsibleModule, '__init__', lambda self: None)
 
     module = AnsibleModule()
     cursor = Cursor()
@@ -88,10 +87,8 @@ def mock_fail_json(self, msg):
 
 
 def test_exec_query_fail_execute(monkeypatch):
-    def mock_execute(self, query):
-        raise ValueError('Fake cursor.execute() failing.')
-
-    monkeypatch.setattr(Cursor, 'execute', mock_execute)
+    monkeypatch.setattr(Cursor, 'execute',
+                        lambda self, x: raise_(ValueError('Fake cursor.execute() failing.')))
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
 
@@ -106,10 +103,8 @@ def test_exec_query_fail_execute(monkeypatch):
 
 
 def test_exec_query_fail_fetchall(monkeypatch):
-    def mock_fetchall(self):
-        raise ValueError('Fake cursor.fetchall() failing.')
-
-    monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
+    monkeypatch.setattr(Cursor, 'fetchall',
+                        lambda self: raise_(ValueError('Fake cursor.fetchall() failing.')))
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
 
