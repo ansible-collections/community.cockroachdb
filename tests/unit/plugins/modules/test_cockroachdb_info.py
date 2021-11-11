@@ -119,11 +119,14 @@ def test_exec_query_fail_fetchall(monkeypatch):
 
 
 @pytest.mark.parametrize('fetchall_out,expected', [
-    ([['postgres', None]], {'postgres': {}}),
-    ([['postgres', 'comment1']], {'postgres': {'comment': 'comment1'}}),
+    ([{'database_name': 'postgres', 'comment': None}], {'postgres': {'comment': None}}),
+    ([{'database_name': 'postgres', 'comment': 'test'}], {'postgres': {'comment': 'test'}}),
     (
-        [['postgres', 'comment1'], ['test', 'comment2']],
-        {'postgres': {'comment': 'comment1'}, 'test': {'comment': 'comment2'}},
+        [
+            {'database_name': 'postgres', 'comment': 'test0'},
+            {'database_name': 'test', 'comment': 'test1'},
+        ],
+        {'postgres': {'comment': 'test0'}, 'test': {'comment': 'test1'}},
     )]
 )
 def test_get_databases(monkeypatch, fetchall_out, expected):

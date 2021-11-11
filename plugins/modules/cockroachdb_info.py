@@ -69,7 +69,7 @@ from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb 
 
 
 def exec_query(module, cursor, query):
-    """Execute a query and return a list of fetched rows.
+    """Execute a query and return a dict of fetched rows.
 
     The module argument is an Ansible module object.
     Within this function it's used to tell Ansible
@@ -136,9 +136,9 @@ def get_server_version(module, cursor):
         'patch': 6,
     }
     """
-    res = exec_query(module, cursor, 'SELECT VERSION()')
+    res = exec_query(module, cursor, 'SELECT VERSION() AS version')
 
-    v_info, ok = extract_server_ver(res[0][0])
+    v_info, ok = extract_server_ver(res[0]['version'])
     if not ok:
         msg = ('Cannot fetch version from '
                '"%s": %s' % (v_info['raw'], v_info['error']))
@@ -158,13 +158,21 @@ def get_databases(module, cursor):
         return {}
 
     db_info = {}
-    for tup in res:
-        dbname = tup[0]
-        comment = tup[1]
+    for d in res:
+        dbname = d['database_name']
         db_info[dbname] = {}
 
-        if comment:
-            db_info[dbname]['comment'] = comment
+        FIELDS = [
+            'comment',
+            'owner',
+            'primary_region',
+            'regions',
+            'survival_goal',
+        ]
+
+        for field in FIELDS:
+            if field in d:
+                db_info[dbname][field] = d[field]
 
     return db_info
 
