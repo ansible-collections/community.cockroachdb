@@ -32,6 +32,9 @@
         - result.version.release > 0
         - result.version.release < 5
         - result.version.patch >= 0
+        - result.databases.defaultdb.comment == 'root'
+        - result.databases.postgres.comment == 'root'
+        - result.databases.system.comment == 'node'
 
 
   - name: Fetch server info in check_mode
@@ -49,3 +52,6 @@
         - result.version.release > 0
         - result.version.release < 5
         - result.version.patch >= 0
+        - result.databases.defaultdb.comment == 'root'
+        - result.databases.postgres.comment == 'root'
+        - result.databases.system.comment == 'node'

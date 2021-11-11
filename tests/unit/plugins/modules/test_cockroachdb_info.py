@@ -9,6 +9,7 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_info import (
     exec_query,
     extract_server_ver,
+    get_databases,
     get_server_version,
 )
 
@@ -68,6 +69,7 @@ def test_exec_query(monkeypatch):
 
     monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+
     module = AnsibleModule()
     cursor = Cursor()
     query = 'SELECT VERSION()'
@@ -92,8 +94,8 @@ def test_exec_query_fail_execute(monkeypatch):
     monkeypatch.setattr(Cursor, 'execute', mock_execute)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
-    module = AnsibleModule()
 
+    module = AnsibleModule()
     cursor = Cursor()
     query = 'SELECT VERSION()'
 
@@ -110,8 +112,8 @@ def test_exec_query_fail_fetchall(monkeypatch):
     monkeypatch.setattr(Cursor, 'fetchall', mock_fetchall)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
     monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
-    module = AnsibleModule()
 
+    module = AnsibleModule()
     cursor = Cursor()
     query = 'SELECT VERSION()'
 
@@ -119,3 +121,23 @@ def test_exec_query_fail_fetchall(monkeypatch):
 
     assert module.fail_msg == ('Failed to fetch rows for query "SELECT VERSION()" '
                                'from cursor: Fake cursor.fetchall() failing.')
+
+
+@pytest.mark.parametrize('fetchall_out,expected', [
+    ([['postgres', None]], {'postgres': {}}),
+    ([['postgres', 'comment1']], {'postgres': {'comment': 'comment1'}}),
+    (
+        [['postgres', 'comment1'], ['test', 'comment2']],
+        {'postgres': {'comment': 'comment1'}, 'test': {'comment': 'comment2'}},
+    )]
+)
+def test_get_databases(monkeypatch, fetchall_out, expected):
+    monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
+    monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+
+    module = AnsibleModule()
+    cursor = Cursor()
+
+    assert get_databases(module, cursor) == expected

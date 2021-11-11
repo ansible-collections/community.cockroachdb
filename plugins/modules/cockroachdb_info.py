@@ -147,6 +147,28 @@ def get_server_version(module, cursor):
     return v_info
 
 
+def get_databases(module, cursor):
+    """Get database info from a server.
+
+    Return a dictionary containing database info.
+    """
+    res = exec_query(module, cursor, 'SHOW DATABASES WITH COMMENT')
+
+    if not res:
+        return {}
+
+    db_info = {}
+    for tup in res:
+        dbname = tup[0]
+        comment = tup[1]
+        db_info[dbname] = {}
+
+        if comment:
+            db_info[dbname]['comment'] = comment
+
+    return db_info
+
+
 def main():
     # Set up arguments
     argument_spec = common_argument_spec()
@@ -168,11 +190,13 @@ def main():
     # We will return it to users at the end
     server_info = {
         'version': {},
+        'databases': {},
     }
 
     # Collect info
     # TODO: implement via loop with filtering
     server_info['version'] = get_server_version(module, cursor)
+    server_info['databases'] = get_databases(module, cursor)
 
     # Close cursor and conn
     cursor.close()
