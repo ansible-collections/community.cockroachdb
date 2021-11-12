@@ -79,6 +79,10 @@
         - result.databases.system.primary_region == none
         - result.databases.system.regions == []
         - result.databases.system.survival_goal == none
+        - result.users.root.member_of == ['admin']
+        - result.users.root.options == ''
+        - result.users.admin.member_of == []
+        - result.users.admin.options == ''
 
   - name: Create database
     <<: *task_params
@@ -127,3 +131,7 @@
         - result.databases.test.primary_region == none
         - result.databases.test.regions == []
         - result.databases.test.survival_goal == none
+        - result.users.root.member_of == ['admin']
+        - result.users.root.options == ''
+        - result.users.admin.member_of == []
+        - result.users.admin.options == ''

@@ -177,6 +177,37 @@ def get_databases(module, cursor):
     return db_info
 
 
+def get_users(module, cursor):
+    """Get user info from a server.
+
+    NOTE: This one and get_databases functions technically
+        can be replaced by one function with more arguments
+        but I would keep them separate for better readability.
+
+    Return a dictionary containing user info.
+    """
+    res = exec_query(module, cursor, 'SHOW USERS')
+
+    if not res:
+        return {}
+
+    user_info = {}
+    for d in res:
+        username = d['username']
+        user_info[username] = {}
+
+        FIELDS = [
+            'member_of',
+            'options',
+        ]
+
+        for field in FIELDS:
+            if field in d:
+                user_info[username][field] = d[field]
+
+    return user_info
+
+
 def main():
     # Set up arguments
     argument_spec = common_argument_spec()
@@ -205,6 +236,7 @@ def main():
     # TODO: implement via loop with filtering
     server_info['version'] = get_server_version(module, cursor)
     server_info['databases'] = get_databases(module, cursor)
+    server_info['users'] = get_users(module, cursor)
 
     # Close cursor and conn
     cursor.close()

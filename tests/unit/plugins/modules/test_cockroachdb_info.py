@@ -11,6 +11,7 @@ from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_info 
     extract_server_ver,
     get_databases,
     get_server_version,
+    get_users,
 )
 
 
@@ -139,3 +140,30 @@ def test_get_databases(monkeypatch, fetchall_out, expected):
     cursor = Cursor()
 
     assert get_databases(module, cursor) == expected
+
+
+@pytest.mark.parametrize('fetchall_out,expected', [
+    (
+        [
+            {'username': 'admin', 'member_of': [], 'options': ''},
+        ],
+        {'admin': {'member_of': [], 'options': ''}},
+    ),
+    (
+        [
+            {'username': 'admin', 'member_of': [], 'options': ''},
+            {'username': 'root', 'member_of': ['admin'], 'options': ''},
+        ],
+        {'admin': {'member_of': [], 'options': ''}, 'root': {'member_of': ['admin'], 'options': ''}},
+    )]
+)
+def test_get_users(monkeypatch, fetchall_out, expected):
+    monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
+    monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+
+    module = AnsibleModule()
+    cursor = Cursor()
+
+    assert get_users(module, cursor) == expected
