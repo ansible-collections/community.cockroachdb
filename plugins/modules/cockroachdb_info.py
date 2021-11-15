@@ -147,65 +147,42 @@ def get_server_version(module, cursor):
     return v_info
 
 
-def get_databases(module, cursor):
-    """Get database info from a server.
+def get_info(module, cursor, query, root_key, fields):
+    """Get info from a server.
 
-    Return a dictionary containing database info.
+    As the rows returned by exec_query are a list of dictionaries,
+    for example, [{'user_name': 'Bob', 'member_of': [], 'options': None}],
+    you want to get user info you need pass 'SHOW USERS'
+    as the query argument, 'user_name' as the root_key argument,
+    and ['member_of', 'options'] as the fields argument, so that
+    you'll get the {'Bob': {'member_of': [], 'options': None}} dict
+    as a return value.
+
+    Args:
+        module (AnsibleModule) - AnsibleModule class object
+        cursor (psycopg2.Cursor) - psycopg2.Cursor class object
+        query (string) - query to pass to the exec_query function
+        root_key (string) - key that should be a root key of the ret dict
+        fields (list) - list of strings that represents fields
+            we wanna get
+
+    Return a dictionary containing info.
     """
-    res = exec_query(module, cursor, 'SHOW DATABASES WITH COMMENT')
+    res = exec_query(module, cursor, query)
 
     if not res:
         return {}
 
-    db_info = {}
-    for d in res:
-        dbname = d['database_name']
-        db_info[dbname] = {}
+    info = {}
+    for row in res:
+        root = row[root_key]
+        info[root] = {}
 
-        FIELDS = [
-            'comment',
-            'owner',
-            'primary_region',
-            'regions',
-            'survival_goal',
-        ]
+        for field in fields:
+            if field in row:
+                info[root][field] = row[field]
 
-        for field in FIELDS:
-            if field in d:
-                db_info[dbname][field] = d[field]
-
-    return db_info
-
-
-def get_users(module, cursor):
-    """Get user info from a server.
-
-    NOTE: This one and get_databases functions technically
-        can be replaced by one function with more arguments
-        but I would keep them separate for better readability.
-
-    Return a dictionary containing user info.
-    """
-    res = exec_query(module, cursor, 'SHOW USERS')
-
-    if not res:
-        return {}
-
-    user_info = {}
-    for d in res:
-        username = d['username']
-        user_info[username] = {}
-
-        FIELDS = [
-            'member_of',
-            'options',
-        ]
-
-        for field in FIELDS:
-            if field in d:
-                user_info[username][field] = d[field]
-
-    return user_info
+    return info
 
 
 def main():
@@ -235,8 +212,13 @@ def main():
     # Collect info
     # TODO: implement via loop with filtering
     server_info['version'] = get_server_version(module, cursor)
-    server_info['databases'] = get_databases(module, cursor)
-    server_info['users'] = get_users(module, cursor)
+    server_info['databases'] = get_info(module, cursor,
+                                        'SHOW DATABASES WITH COMMENT',
+                                        'database_name',
+                                        ['comment', 'owner', 'primary_region',
+                                         'regions', 'survival_goal'])
+    server_info['users'] = get_info(module, cursor, 'SHOW USERS', 'username',
+                                    ['member_of', 'options'])
 
     # Close cursor and conn
     cursor.close()

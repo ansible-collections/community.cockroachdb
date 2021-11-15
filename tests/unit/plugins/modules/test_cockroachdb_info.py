@@ -9,9 +9,8 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.community.cockroachdb.plugins.modules.cockroachdb_info import (
     exec_query,
     extract_server_ver,
-    get_databases,
     get_server_version,
-    get_users,
+    get_info,
 )
 
 
@@ -119,10 +118,43 @@ def test_exec_query_fail_fetchall(monkeypatch):
                                'from cursor: Fake cursor.fetchall() failing.')
 
 
-@pytest.mark.parametrize('fetchall_out,expected', [
-    ([{'database_name': 'postgres', 'comment': None}], {'postgres': {'comment': None}}),
-    ([{'database_name': 'postgres', 'comment': 'test'}], {'postgres': {'comment': 'test'}}),
+@pytest.mark.parametrize('query,root_key,fields,fetchall_out,expected', [
     (
+        'SHOW USERS',
+        'username',
+        ['member_of', 'options'],
+        [
+            {'username': 'admin', 'member_of': [], 'options': ''},
+        ],
+        {'admin': {'member_of': [], 'options': ''}},
+    ),
+    (
+        'SHOW USERS',
+        'username',
+        ['member_of', 'options'],
+        [
+            {'username': 'admin', 'member_of': [], 'options': ''},
+            {'username': 'root', 'member_of': ['admin'], 'options': ''},
+        ],
+        {'admin': {'member_of': [], 'options': ''}, 'root': {'member_of': ['admin'], 'options': ''}},
+    ),
+    (
+        'SHOW DATABASES WITH COMMENT',
+        'database_name',
+        ['comment'],
+        [{'database_name': 'postgres', 'comment': None}],
+        {'postgres': {'comment': None}}
+    ),
+    (
+        'SHOW DATABASES WITH COMMENT',
+        'database_name',
+        ['comment'],
+        [{'database_name': 'postgres', 'comment': 'test'}], {'postgres': {'comment': 'test'}}
+    ),
+    (
+        'SHOW DATABASES WITH COMMENT',
+        'database_name',
+        ['comment'],
         [
             {'database_name': 'postgres', 'comment': 'test0'},
             {'database_name': 'test', 'comment': 'test1'},
@@ -130,7 +162,7 @@ def test_exec_query_fail_fetchall(monkeypatch):
         {'postgres': {'comment': 'test0'}, 'test': {'comment': 'test1'}},
     )]
 )
-def test_get_databases(monkeypatch, fetchall_out, expected):
+def test_get_info(monkeypatch, query, root_key, fields, fetchall_out, expected):
     monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
     monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
     monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
@@ -139,31 +171,7 @@ def test_get_databases(monkeypatch, fetchall_out, expected):
     module = AnsibleModule()
     cursor = Cursor()
 
-    assert get_databases(module, cursor) == expected
+    assert get_info(module, cursor, query, root_key, fields) == expected
 
 
-@pytest.mark.parametrize('fetchall_out,expected', [
-    (
-        [
-            {'username': 'admin', 'member_of': [], 'options': ''},
-        ],
-        {'admin': {'member_of': [], 'options': ''}},
-    ),
-    (
-        [
-            {'username': 'admin', 'member_of': [], 'options': ''},
-            {'username': 'root', 'member_of': ['admin'], 'options': ''},
-        ],
-        {'admin': {'member_of': [], 'options': ''}, 'root': {'member_of': ['admin'], 'options': ''}},
-    )]
-)
-def test_get_users(monkeypatch, fetchall_out, expected):
-    monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
-    monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
-    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
-    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
-
-    module = AnsibleModule()
-    cursor = Cursor()
-
-    assert get_users(module, cursor) == expected
+# TODO: test_get_server_version
