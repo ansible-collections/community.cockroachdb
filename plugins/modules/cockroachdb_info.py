@@ -219,6 +219,8 @@ def main():
                                          'regions', 'survival_goal'])
     server_info['users'] = get_info(module, cursor, 'SHOW USERS', 'username',
                                     ['member_of', 'options'])
+    server_info['settings'] = get_info(module, cursor, 'SHOW ALL CLUSTER SETTINGS',
+                                       'variable', ['value', 'setting_type'])
 
     # Close cursor and conn
     cursor.close()
