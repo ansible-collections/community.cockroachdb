@@ -198,3 +198,26 @@ def test_get_server_version(monkeypatch, fetchall_out, expected):
     cursor = Cursor()
 
     assert get_server_version(module, cursor) == expected
+
+
+@pytest.mark.parametrize('fetchall_out,expected', [
+    (
+        [{'version': 'blah blah'}],
+        'Cannot fetch version from "blah blah": invalid literal for int() with base 10: \'ah\'',
+    ),
+    (
+        [{'version': 'CockroachDB CCL v21.1.something wrong'}],
+        'Cannot fetch version from "CockroachDB CCL v21.1.something wrong": invalid literal for int() with base 10: \'something\'',
+    ),
+])
+def test_get_server_version_fail(monkeypatch, fetchall_out, expected):
+    monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
+    monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+
+    module = AnsibleModule()
+    cursor = Cursor()
+
+    get_server_version(module, cursor)
+    assert module.fail_msg == expected
