@@ -174,4 +174,27 @@ def test_get_info(monkeypatch, query, root_key, fields, fetchall_out, expected):
     assert get_info(module, cursor, query, root_key, fields) == expected
 
 
-# TODO: test_get_server_version
+@pytest.mark.parametrize('fetchall_out,expected', [
+    (
+        [{'version': 'CockroachDB CCL v21.1.6 blah'}],
+        {'raw': 'CockroachDB CCL v21.1.6 blah', 'year': 21, 'release': 1, 'patch': 6},
+    ),
+    (
+        [{'version': 'CockroachDB CCL v22.2.16 blah'}],
+        {'raw': 'CockroachDB CCL v22.2.16 blah', 'year': 22, 'release': 2, 'patch': 16},
+    ),
+    (
+        [{'version': 'CockroachDB CCL v23.4.0 blah'}],
+        {'raw': 'CockroachDB CCL v23.4.0 blah', 'year': 23, 'release': 4, 'patch': 0},
+    ),
+])
+def test_get_server_version(monkeypatch, fetchall_out, expected):
+    monkeypatch.setattr(Cursor, 'execute', lambda self, x: None)
+    monkeypatch.setattr(Cursor, 'fetchall', lambda self: fetchall_out)
+    monkeypatch.setattr(AnsibleModule, '__init__', mock__init__)
+    monkeypatch.setattr(AnsibleModule, 'fail_json', mock_fail_json)
+
+    module = AnsibleModule()
+    cursor = Cursor()
+
+    assert get_server_version(module, cursor) == expected
