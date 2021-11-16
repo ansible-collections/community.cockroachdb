@@ -22,7 +22,7 @@
     <<: *task_params
     cockroachdb_query:
       <<: *conn_params
-      query: 'CREATE DATABASE root'
+      query: CREATE DATABASE root
 
   - name: Fetch server info
     <<: *task_params
@@ -145,3 +145,4 @@
         - result.users.root.options == ''
         - result.users.admin.member_of == []
         - result.users.admin.options == ''
+        - result.regions == {}
