@@ -222,7 +222,7 @@ def main():
     server_info['settings'] = get_info(module, cursor, 'SHOW ALL CLUSTER SETTINGS',
                                        'variable', ['value', 'setting_type'])
     server_info['regions'] = get_info(module, cursor, 'SHOW REGIONS FROM CLUSTER',
-                                       'region', ['zones'])
+                                      'region', ['zones'])
 
     # Close cursor and conn
     cursor.close()
