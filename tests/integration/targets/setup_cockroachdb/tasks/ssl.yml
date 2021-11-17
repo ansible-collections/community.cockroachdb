@@ -5,6 +5,7 @@
   loop:
   - '{{ cert_dir }}'
   - '{{ key_dir }}'
+  register: result
 
 - name: Generalte certs and keys
   command: '{{ item }}'
@@ -12,3 +13,4 @@
   - 'cockroach cert create-ca --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'
   - 'cockroach cert create-node localhost $(hostname) --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'
   - 'cockroach cert create-client root --certs-dir={{ cert_dir }} --ca-key={{ key_dir }}/ca.key'
+  when: result is changed
