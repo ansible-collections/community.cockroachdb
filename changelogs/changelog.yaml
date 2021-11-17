@@ -11,3 +11,18 @@ releases:
       name: cockroachdb_query
       namespace: ''
     release_date: '2021-11-08'
+  0.2.0:
+    changes:
+      release_summary: 'This is the minor release of the ``community.cockroachdb``
+        collection.
+
+        This changelog contains all changes to the modules and plugins in this collection
+
+        that have been made after the previous release.'
+    fragments:
+    - 0.2.0.yml
+    modules:
+    - description: Gather information about CockroachDB servers
+      name: cockroachdb_info
+      namespace: ''
+    release_date: '2021-11-17'
