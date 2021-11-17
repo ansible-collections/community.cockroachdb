@@ -49,8 +49,10 @@ Every voice is important and every idea is valuable. If you have something on yo
 
 ## Included content
 
-- **Modules**:
-  - cockroachdb_query: Run queries in a CockroachDB database.
+**Modules**:
+
+- cockroachdb_info: Gather information about CockroachDB servers.
+- cockroachdb_query: Run queries in a CockroachDB database.
 
 ## Tested with Ansible
 
@@ -95,28 +97,27 @@ See [Ansible Using collections](https://docs.ansible.com/ansible/latest/user_gui
 ### Usage example
 
 ```yaml
-- name: Get the server version
+- name: Gather server info
+  community.cockroachdb.cockroachdb_info:
+    ssl_mode: verify-full
+    ssl_root_cert: /tmp/certs/ca.crt
+    ssl_cert: /tmp/certs/client.root.crt
+    ssl_key: /tmp/certs/client.root.key
+  register: srv_info
+
+- name: Print information returned from the previous task
+  ansible.builtin.debug:
+    var: srv_info
+    verbosity: 2
+
+- name: Run a query with condition
   community.cockroachdb.cockroachdb_query:
     ssl_mode: verify-full
     ssl_root_cert: /tmp/certs/ca.crt
     ssl_cert: /tmp/certs/client.root.crt
     ssl_key: /tmp/certs/client.root.key
-    query: 'SELECT VERSION()'
-  register: result
-
-- name: Print information returned from the previous task
-  ansible.builtin.debug:
-    var: result
-    verbosity: 2
-
-- name: Assert the result
-  assert:
-    that:
-      - result is changed
-      - result.query == 'SELECT VERSION()'
-      - result.statusmessage == 'SELECT 1'
-      - result.rowcount == 1
-      - result.query_result.0.version == 'CockroachDB CCL v21.1.6'
+    query: 'CREATE DATABASE root'
+  when: srv_info.version.year > 20 and srv_info.version.release > 1
 ```
 
 ## Licensing
