@@ -210,7 +210,6 @@ def main():
     }
 
     # Collect info
-    # TODO: implement via loop with filtering
     server_info['version'] = get_server_version(module, cursor)
     server_info['databases'] = get_info(module, cursor,
                                         'SHOW DATABASES WITH COMMENT',
