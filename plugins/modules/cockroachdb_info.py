@@ -105,7 +105,6 @@ def extract_server_ver(ver_str):
         'patch': 6,
     }
     """
-
     version_info = {}
     version_info['raw'] = ver_str
 
@@ -204,10 +203,7 @@ def main():
 
     # Dictionary that will contain server information.
     # We will return it to users at the end
-    server_info = {
-        'version': {},
-        'databases': {},
-    }
+    server_info = {}
 
     # Collect info
     server_info['version'] = get_server_version(module, cursor)
