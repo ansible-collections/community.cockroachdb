@@ -166,7 +166,7 @@ def convert_to_supported(val):
     if isinstance(val, decimal.Decimal):
         return float(val)
 
-    elif isinstance(val, datetime.timedelta):
+    if isinstance(val, datetime.timedelta):
         return str(val)
 
     return val  # By default returns the same value
