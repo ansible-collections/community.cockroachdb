@@ -21,7 +21,7 @@ except ImportError:
 from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils._text import to_native
 from ansible.module_utils.six import iteritems
-from distutils.version import LooseVersion
+from ansible_collections.community.cockroachdb.plugins.module_utils.version import LooseVersion
 
 
 def common_argument_spec():
