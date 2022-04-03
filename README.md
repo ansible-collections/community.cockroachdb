@@ -54,8 +54,9 @@ Every voice is important and every idea is valuable. If you have something on yo
 - cockroachdb_info: Gather information about CockroachDB servers.
 - cockroachdb_query: Run queries in a CockroachDB database.
 
-## Tested with Ansible
+## Tested with ansible-core
 
+- 2.14 and Python 3.8
 - devel and Python 3.8
 
 ## External requirements
