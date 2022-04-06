@@ -54,7 +54,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb import (
     common_argument_spec,
-    CockroachDB,
+    CockroachDBServer,
     get_conn_params,
 )
 
@@ -99,7 +99,7 @@ def main():
     changed = False
 
     # Connect to DB, get cursor
-    cockroachdb = CockroachDB(module)
+    cockroachdb = CockroachDBServer(module)
 
     conn = cockroachdb.connect(conn_params=get_conn_params(module.params),
                                autocommit=True, rows_type='dict')
