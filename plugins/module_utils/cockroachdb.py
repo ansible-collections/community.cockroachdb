@@ -65,7 +65,7 @@ def ensure_required_libs(module):
         module.fail_json(msg=missing_required_lib('psycopg2'))
 
 
-class CockroachDB():
+class CockroachDBServer():
     """Class for working with CockroachDB.
 
     Args:
