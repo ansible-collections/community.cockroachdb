@@ -148,7 +148,7 @@ from ansible.module_utils.six import iteritems
 
 from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb import (
     common_argument_spec,
-    CockroachDB,
+    CockroachDBServer,
     get_conn_params,
 )
 
@@ -297,7 +297,7 @@ def main():
     rows_type = module.params['rows_type']
 
     # Connect to DB, get cursor
-    cockroachdb = CockroachDB(module)
+    cockroachdb = CockroachDBServer(module)
 
     if rows_type == 'dict':
         fetch_from_cursor = fetch_from_cursor_dict
