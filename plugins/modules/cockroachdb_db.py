@@ -60,12 +60,29 @@ from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb 
 
 
 class CockroachDBDatabase():
-    def __init__(self, name):
+    def __init__(self, cursor, name):
+        self.cursor = cursor
         self.name = name
-        self.exists = True
+        # Defaults
+        self.exists = False
+        self.primary_region = None
+        self.regions = []
+        self.survive = None
+        self.owner = None
+        # Update the above by fetching
+        # the info from the database
+        self.__fetch_info()
 
-    def exists(self):
-        pass
+    def __fetch_info(self):
+        self.cursor.execute('SHOW DATABASES')
+        res = self.cursor.fetchall()
+        for d in res:
+            if d['database_name'] == self.name:
+                self.exists = True
+                self.owner = d['owner']
+                self.primary_region = d['primary_region']
+                self.regions = d['regions']
+                self.survive = d['survival_goal']
 
     def create(self):
         pass
@@ -106,7 +123,7 @@ def main():
     cursor = conn.cursor()
 
     # Instantiate the main object here and do the job
-    database = CockroachDBDatabase(name)
+    database = CockroachDBDatabase(cursor, name)
 
     # Do job
     if state == 'present':
@@ -129,6 +146,12 @@ def main():
     # Users will get this in JSON output after execution
     kw = dict(
         changed=changed,
+        # FIXME for debug purposes only. Remove the below later
+        exists=database.exists,
+        owner=database.owner,
+        primary_region=database.primary_region,
+        regions=database.regions,
+        survive=database.survive,
     )
 
     module.exit_json(**kw)
