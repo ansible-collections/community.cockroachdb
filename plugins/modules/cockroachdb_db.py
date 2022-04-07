@@ -96,7 +96,12 @@ class CockroachDBDatabase():
         executed_statements.append((query, ()))
 
     def drop(self):
-        pass
+        if self.module.check_mode:
+            return
+
+        query = 'DROP DATABASE "%s"' % self.name
+        self.cursor.execute(query)
+        executed_statements.append((query, ()))
 
     def modify(self):
         return False

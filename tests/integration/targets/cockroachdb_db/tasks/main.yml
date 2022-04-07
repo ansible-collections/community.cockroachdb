@@ -17,6 +17,33 @@
       register: result
 
   block:
+  - name: Create database in check mode
+    <<: *task_params
+    cockroachdb_db:
+      <<: *conn_params
+      name: root
+      state: present
+    check_mode: yes
+
+  - name: Check
+    assert:
+      that:
+        - result is changed
+
+  # TODO: Add check by cockroachdb_query later
+
+  - name: Drop database in check mode
+    <<: *task_params
+    cockroachdb_db:
+      <<: *conn_params
+      name: root
+      state: absent
+    check_mode: yes
+
+  - name: Check
+    assert:
+      that:
+        - result is not changed
 
   - name: Create database
     <<: *task_params
@@ -41,3 +68,32 @@
     assert:
       that:
         - result is not changed
+
+  - name: Drop database in check mode
+    <<: *task_params
+    cockroachdb_db:
+      <<: *conn_params
+      name: root
+      state: absent
+    check_mode: yes
+
+  - name: Check
+    assert:
+      that:
+        - result is changed
+
+  # TODO: Add check by cockroachdb_query later
+
+  - name: Drop database
+    <<: *task_params
+    cockroachdb_db:
+      <<: *conn_params
+      name: root
+      state: absent
+
+  - name: Check
+    assert:
+      that:
+        - result is changed
+
+  # TODO: Add check by cockroachdb_query later
