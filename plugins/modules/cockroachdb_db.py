@@ -58,9 +58,12 @@ from ansible_collections.community.cockroachdb.plugins.module_utils.cockroachdb 
     get_conn_params,
 )
 
+executed_statements = []
+
 
 class CockroachDBDatabase():
-    def __init__(self, cursor, name):
+    def __init__(self, module, cursor, name):
+        self.module = module
         self.cursor = cursor
         self.name = name
         # Defaults
@@ -85,13 +88,18 @@ class CockroachDBDatabase():
                 self.survive = d['survival_goal']
 
     def create(self):
-        pass
+        if self.module.check_mode:
+            return
+
+        query = 'CREATE DATABASE "%s"' % self.name
+        self.cursor.execute(query)
+        executed_statements.append((query, ()))
 
     def drop(self):
         pass
 
     def modify(self):
-        return True
+        return False
 
 
 def main():
@@ -123,7 +131,7 @@ def main():
     cursor = conn.cursor()
 
     # Instantiate the main object here and do the job
-    database = CockroachDBDatabase(cursor, name)
+    database = CockroachDBDatabase(module, cursor, name)
 
     # Do job
     if state == 'present':
@@ -146,6 +154,7 @@ def main():
     # Users will get this in JSON output after execution
     kw = dict(
         changed=changed,
+        executed_statements=executed_statements,
         # FIXME for debug purposes only. Remove the below later
         exists=database.exists,
         owner=database.owner,
