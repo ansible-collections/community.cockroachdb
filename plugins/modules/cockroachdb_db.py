@@ -32,6 +32,20 @@ options:
     description: Database name to create, modify or delete.
     type: str
     required: yes
+  owner:
+    description: Database owner.
+    type: str
+  primary_region:
+    description: Primary region name.
+    type: str
+  regions:
+    description: Database regions.
+    type: list
+    elements: str
+  survive_failure:
+    description: FIXME
+    type: str
+    choices: ['region', 'zone']
 '''
 
 EXAMPLES = r'''
@@ -70,7 +84,7 @@ class CockroachDBDatabase():
         self.exists = False
         self.primary_region = None
         self.regions = []
-        self.survive = None
+        self.survive_failure = None
         self.owner = None
         # Update the above by fetching
         # the info from the database
@@ -85,7 +99,7 @@ class CockroachDBDatabase():
                 self.owner = d['owner']
                 self.primary_region = d['primary_region']
                 self.regions = d['regions']
-                self.survive = d['survival_goal']
+                self.survive_failure = d['survival_goal']
 
     def create(self):
         if self.module.check_mode:
@@ -111,8 +125,12 @@ def main():
     # Set up arguments
     argument_spec = common_argument_spec()
     argument_spec.update(
-        name=dict(type='str'),
+        name=dict(type='str', required=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
+        owner=dict(type='str'),
+        primary_region=dict(type='str'),
+        regions=dict(type='list', elements='str'),
+        survive_failure=dict(type='str', choices=['region', 'zone']),
     )
 
     # Instantiate an object of module class
@@ -124,6 +142,10 @@ def main():
     # Assign passed options to variables
     name = module.params['name']
     state = module.params['state']
+    owner = module.params['owner']
+    primary_region = module.params['primary_region']
+    regions = module.params['regions']
+    survive_failure = module.params['survive_failure']
 
     # Set defaults
     changed = False
@@ -165,7 +187,7 @@ def main():
         owner=database.owner,
         primary_region=database.primary_region,
         regions=database.regions,
-        survive=database.survive,
+        survive_failure=database.survive_failure,
     )
 
     module.exit_json(**kw)
