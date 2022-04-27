@@ -32,6 +32,13 @@ options:
     description: Database name to create, modify or delete.
     type: str
     required: yes
+  state:
+    description:
+    - If C(present), creates if it does not exist or modifies it.
+    - If C(absent), deletes the database.
+    type: str
+    choices: [absent, present]
+    default: present
   owner:
     description: Database owner.
     type: str
