@@ -59,7 +59,7 @@ EXAMPLES = r'''
 # Connect in the verify-full SSL mode to the acme database
 # and create the test_db database
 - name: Create test_db database
-  community.cockroachdb.cockroachdb_query:
+  community.cockroachdb.cockroachdb_db:
     login_host: 192.168.0.10
     login_db: acme
     ssl_mode: verify-full
