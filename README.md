@@ -56,7 +56,7 @@ Every voice is important and every idea is valuable. If you have something on yo
 
 ## Tested with ansible-core
 
-- 2.14 and Python 3.8
+- 2.13 and Python 3.8
 - devel and Python 3.8
 
 ## External requirements
