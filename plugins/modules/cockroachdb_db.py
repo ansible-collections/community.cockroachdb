@@ -214,6 +214,7 @@ def main():
         survive_failure=database.survive_failure,
     )
 
+    # Return values and exit
     module.exit_json(**kw)
 
 
