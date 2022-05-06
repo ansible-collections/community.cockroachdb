@@ -74,6 +74,7 @@ class CockroachDBServer():
     def __init__(self, module):
         self.module = module
         self.connection = None
+        ensure_required_libs(self.module)
 
     def connect(self, conn_params, autocommit=False, fail_on_conn=True, rows_type='dict'):
         """Connect to a CockroachDB database.
@@ -88,7 +89,6 @@ class CockroachDBServer():
             fail_on_conn (bool) -- fail if connection failed or just warn and return None (default True)
             rows_type (str) -- specifies rows of which type to return
         """
-        ensure_required_libs(self.module)
 
         if rows_type == 'dict':
             cursor_factory = DictCursor

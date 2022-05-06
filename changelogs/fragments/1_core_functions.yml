@@ -1,0 +1,2 @@
+bugfixes:
+- Collection core functions - change place where the required libs check is invoked to avoid unexpected errors when psycopg2 is missed (https://github.com/ansible-collections/community.cockroachdb/pull/33).
