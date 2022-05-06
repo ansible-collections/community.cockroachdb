@@ -124,13 +124,26 @@ class CockroachDBDatabase():
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
-    def modify(self):
+    def modify(self, owner):
+        if owner is not None and self.owner != owner:
+            if self.module.check_mode:
+                return True
+
+            query = 'ALTER DATABASE "%s" OWNER TO "%s"' % (self.name, owner)
+            self.cursor.execute(query)
+            executed_statements.append((query, ()))
+            return True
+
         return False
 
 
 def main():
     # Set up arguments
+    # We keep arguments common for all modules (like connection-related)
+    # in a dict returned by plugins.module_utils.cockroachdb.common_argument_spec
     argument_spec = common_argument_spec()
+
+    # Then we add arguments specific to this module
     argument_spec.update(
         name=dict(type='str', required=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
@@ -141,6 +154,10 @@ def main():
     )
 
     # Instantiate an object of module class
+    # which is an interface we use to interact with ansible-core
+    # from the module (e.g., it'll check if a user passed only acceptable arguments
+    # and their acceptable values, we can show warnings to users,
+    # we can gracefully fail when we need, and, at the end, we can return values to users)
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
@@ -164,7 +181,7 @@ def main():
                                autocommit=True, rows_type='dict')
     cursor = conn.cursor()
 
-    # Instantiate the main object here and do the job
+    # Instantiate the main object of the module
     database = CockroachDBDatabase(module, cursor, name)
 
     # Do job
@@ -173,7 +190,7 @@ def main():
             database.create()
             changed = True
         else:
-            changed = database.modify()
+            changed = database.modify(owner)
 
     else:
         # When state is absent
