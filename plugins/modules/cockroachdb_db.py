@@ -125,16 +125,22 @@ class CockroachDBDatabase():
         executed_statements.append((query, ()))
 
     def modify(self, owner):
+        changed = False
+
         if owner is not None and self.owner != owner:
             if self.module.check_mode:
                 return True
 
-            query = 'ALTER DATABASE "%s" OWNER TO "%s"' % (self.name, owner)
-            self.cursor.execute(query)
-            executed_statements.append((query, ()))
-            return True
+            self.__change_owner(owner)
 
-        return False
+            changed = True
+
+        return changed
+
+    def __change_owner(self, new_owner):
+        query = 'ALTER DATABASE "%s" OWNER TO "%s"' % (self.name, new_owner)
+        self.cursor.execute(query)
+        executed_statements.append((query, ()))
 
 
 def main():
