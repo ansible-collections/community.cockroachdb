@@ -135,6 +135,12 @@ class CockroachDBDatabase():
 
             changed = True
 
+        # Change regions
+
+        # Change primary region
+
+        # Change survive failure
+
         return changed
 
     def __change_owner(self, new_owner):
