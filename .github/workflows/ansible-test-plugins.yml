@@ -96,7 +96,7 @@ jobs:
           - stable-2.13
           - devel
         python:
-          - 3.9
+          - 3.8
     steps:
 
       - name: Check out code
