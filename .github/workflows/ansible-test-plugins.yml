@@ -94,9 +94,9 @@ jobs:
       matrix:
         ansible:
           - stable-2.13
-          - devel
+          #- devel  # We need Python 3.9 but ubuntu 2004 doesn't have it. Anyway to test against devel is not a requirement
         python:
-          - 3.9
+          - 3.8
     steps:
 
       - name: Check out code
