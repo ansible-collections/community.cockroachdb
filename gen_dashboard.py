@@ -4,7 +4,8 @@
 
 import sys
 
-BADGE_TEMPLATE = '[![[%s](%s)](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n'
+#BADGE_TEMPLATE = '[![[%s](%s)](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n'
+BADGE_TEMPLATE = '[![%s](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n'
 
 
 def check_arg_num():
@@ -17,7 +18,7 @@ def generate_dashboard(url_file, dashboard_file):
     for url in url_file:
         url = url.rstrip('\n')
         name = ('/').join(url.split('/')[-2:])
-        dashboard_file.write(BADGE_TEMPLATE % (name, url, url))
+        dashboard_file.write(BADGE_TEMPLATE % (name, url))
 
 
 def main():
