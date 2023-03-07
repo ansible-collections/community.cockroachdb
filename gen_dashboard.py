@@ -5,7 +5,7 @@
 import sys
 
 #BADGE_TEMPLATE = '[![[%s](%s)](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n'
-BADGE_TEMPLATE = '[![%s](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n'
+BADGE_TEMPLATE = '[![%s](%s/workflows/Plugins%%20CI/badge.svg?event=push)]\n\n'
 
 
 def check_arg_num():
