@@ -45,8 +45,8 @@ options:
   survive_failure:
     description: Survival in case of regional failures or in case of zone failures
     type: str
-    choices: ['region', 'zone']
-    default: zone
+    choices: ['', 'region', 'zone']
+    default: ''
 '''
 
 EXAMPLES = r'''
@@ -147,32 +147,45 @@ class CockroachDBDatabase():
 
     def drop(self):
         if self.module.check_mode:
-            return
+            return True
 
         query = 'DROP DATABASE "%s"' % self.name
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
-    def modify(self, owner, primary_region, regions, survive_failure):
+    def rename(self, new_name):
+        if self.module.check_mode:
+            return True
+
+        query = 'ALTER DATABASE "%s" RENAME TO "%s"' % (self.name, new_name)
+        self.cursor.execute(query)
+        executed_statements.append((query, ()))
+
+    def modify(self, owner, target, primary_region, regions, survive_failure):
         changed = False
 
         # Change owner
-        if owner is not None and self.owner != owner:
+        if owner:
             if self.module.check_mode:
                 return True
             self.__change_owner(owner)
             changed = True
 
-        # Add primary region and regions
-        if primary_region:
+        if target:
             if self.module.check_mode:
                 return True
-            self.__change_region(primary_region, regions)
-            changed = True
+            self.__change_name(target)
 
-        if self.survive_failure.lower() != survive_failure:
-            self.__change_survive_failure(survive_failure)
-            changed = True
+        # Add primary region and regions
+        # if primary_region:
+        #     if self.module.check_mode:
+        #         return True
+        #     self.__change_region(primary_region, regions)
+        #     changed = True
+
+        # if survive_failure:
+        #     self.__change_survive_failure(survive_failure)
+        #     changed = True
 
         return changed
 
@@ -186,20 +199,20 @@ class CockroachDBDatabase():
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
-    def __change_region(self, new_primary_regions, new_regions):
-        if new_primary_regions and not new_regions:
-            query = """ALTER DATABASE "%s" 
-                ADD REGION IF NOT EXISTS "%s" """ % (self.name, new_primary_regions)
-        elif new_primary_regions and new_regions:
-            query = """ALTER DATABASE "%s" 
-                ADD SUPER REGION "%s" VALUES %s """ % (self.name, new_primary_regions, new_regions)
-        self.cursor.execute(query)
-        executed_statements.append((query, ()))
+    # def __change_region(self, new_primary_regions, new_regions):
+    #     if new_primary_regions and not new_regions:
+    #         query = """ALTER DATABASE "%s" 
+    #             PRIMARY REGION "%s" """ % (self.name, new_primary_regions)
+    #     elif new_primary_regions and new_regions:
+    #         query = """ALTER DATABASE "%s" 
+    #             ADD SUPER REGION "%s" VALUES %s """ % (self.name, new_primary_regions, new_regions)
+    #     self.cursor.execute(query)
+    #     executed_statements.append((query, ()))
 
-    def __change_survive_failure(self, survive_failure):
-        query = 'ALTER DATABASE "%s" SURVIVE %s FAILURE' % (self.name, survive_failure.upper())
-        self.cursor.execute(query)
-        executed_statements.append((query, ()))
+    # def __change_survive_failure(self, survive_failure):
+    #     query = 'ALTER DATABASE "%s" SURVIVE %s FAILURE' % (self.name, survive_failure.upper())
+    #     self.cursor.execute(query)
+    #     executed_statements.append((query, ()))
 
 
 def main():
@@ -213,9 +226,10 @@ def main():
         name=dict(type='str', required=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         owner=dict(type='str'),
+        target=dict(type='str'),
         primary_region=dict(type='str'),
         regions=dict(type='list', elements='str'),
-        survive_failure=dict(type='str', choices=['region', 'zone'], default='zone'),
+        survive_failure=dict(type='str', choices=['', 'region', 'zone'], default=''),
     )
 
     # Instantiate an object of module class
@@ -235,6 +249,7 @@ def main():
     primary_region = module.params['primary_region']
     regions = module.params['regions']
     survive_failure = module.params['survive_failure']
+    target = module.params['target']
 
     # Set defaults
     changed = False
@@ -255,12 +270,7 @@ def main():
             database.create()
             changed = True
         else:
-            if owner:
-                changed = database.modify(owner, primary_region, regions, survive_failure)
-            if primary_region:
-                database.modify(owner, primary_region, regions)
-            if database.survive_failure.lower() != survive_failure:
-                database.modify(owner, primary_region, regions, )
+            changed = database.modify(owner, target, primary_region, regions, survive_failure)
     else:
         # When state is absent
         if database.exists:

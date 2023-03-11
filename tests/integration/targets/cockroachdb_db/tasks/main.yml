@@ -1,0 +1,95 @@
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+# Test code for cockroachdb_info module
+# Copyright: (c) 2021, Aleks Vagachev (@aleksvagachev) <aleksvagachev@yandex.ru>
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- vars:
+    conn_parameters: &conn_params
+      ssl_mode: verify-full
+      ssl_root_cert: '{{ ssl_root_cert }}'
+      ssl_cert: '{{ ssl_cert }}'
+      ssl_key: '{{ ssl_key }}'
+    task_parameters: &task_params
+      register: result
+
+
+
+- name: Create DB
+  <<: *task_params
+  community.cockroachdb.cockroachdb_db:
+    <<: *conn_params
+    name: test_db
+    owner: root
+  register: result
+
+- name: Check create db
+  assert:
+    that:
+      - result is changed
+      - result.failed == false
+      - result.exists == false
+
+- name: Change owner
+  <<: *task_params
+  community.cockroachdb.cockroachdb_db:
+    <<: *conn_params
+    name: test_db
+    owner: admin
+  register: result
+
+- name: Check change owner
+  assert:
+    that:
+      - result is changed
+      - result.failed == false
+      - result.exists == true
+
+- name: Rename db
+  <<: *task_params
+  community.cockroachdb.cockroachdb_db:
+    <<: *conn_params
+    name: test_db
+    target: dev_db
+  register: result
+
+- name: Check rename db
+  assert:
+    that:
+      - result is changed
+      - result.failed == false
+      - result.exists == true
+
+- name: Check change owner and rename db
+  <<: *task_params
+  community.cockroachdb.cockroachdb_db:
+    <<: *conn_params
+    name: dev_db
+    target: prod_db
+    owner: root
+  register: result
+
+- name: Check rename db
+  assert:
+    that:
+      - result is changed
+      - result.failed == false
+      - result.exists == true
+
+- name: Check drop db
+  <<: *task_params
+  community.cockroachdb.cockroachdb_db:
+    <<: *conn_params
+    name: prod_db
+    state: absent
+  register: result
+
+- name: Check drop db
+  assert:
+    that:
+      - result is changed
+      - result.failed == false
+      - result.exists == true
