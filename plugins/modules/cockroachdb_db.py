@@ -16,6 +16,7 @@ description:
 version_added: '0.3.0'
 author:
   - Andrew Klychkov (@Andersson007)
+  - Aleksandr Vagachev (@aleksvagachev)
 extends_documentation_fragment:
   - community.cockroachdb.cockroachdb
 notes:
@@ -35,9 +36,6 @@ options:
   owner:
     description: Database owner.
     type: str
-  target:
-    description: New database name.
-    type: str
 '''
 
 EXAMPLES = r'''
@@ -52,19 +50,6 @@ EXAMPLES = r'''
     ssl_cert: /tmp/certs/client.root.crt
     ssl_key: /tmp/certs/client.root.key
     name: test_db
-
-- name: Create test_db database
-  community.cockroachdb.cockroachdb_db:
-    login_host: 192.168.0.10
-    login_db: acme
-    owner: test
-    name: test_db
-    primary_region: us-east1
-    survive_failure: region
-    regions:
-        - us-east1
-        - us-west1
-        - us-central1
 
 - name: Drop test_db database
   community.cockroachdb.cockroachdb_db:
@@ -139,14 +124,6 @@ class CockroachDBDatabase():
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
-    def rename(self, new_name):
-        if self.module.check_mode:
-            return True
-
-        query = 'ALTER DATABASE "%s" RENAME TO "%s"' % (self.name, new_name)
-        self.cursor.execute(query)
-        executed_statements.append((query, ()))
-
     def modify(self, owner, target):
         changed = False
 
@@ -157,20 +134,10 @@ class CockroachDBDatabase():
             self.__change_owner(owner)
             changed = True
 
-        if target:
-            if self.module.check_mode:
-                return True
-            self.__change_name(target)
-
         return changed
 
     def __change_owner(self, new_owner):
         query = 'ALTER DATABASE "%s" OWNER TO %s' % (self.name, new_owner)
-        self.cursor.execute(query)
-        executed_statements.append((query, ()))
-
-    def __change_name(self, new_name):
-        query = 'ALTER DATABASE "%s" RENAME TO "%s"' % (self.name, new_name)
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
@@ -239,12 +206,6 @@ def main():
     kw = dict(
         changed=changed,
         executed_statements=executed_statements,
-        # FIXME for debug purposes only. Remove the below later
-        exists=database.exists,
-        owner=database.owner,
-        primary_region=database.primary_region,
-        regions=database.regions,
-        survive_failure=database.survive_failure,
     )
 
     # Return values and exit

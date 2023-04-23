@@ -48,37 +48,6 @@
       - result.failed == false
       - result.exists == true
 
-- name: Rename db
-  <<: *task_params
-  community.cockroachdb.cockroachdb_db:
-    <<: *conn_params
-    name: test_db
-    target: dev_db
-  register: result
-
-- name: Check rename db
-  assert:
-    that:
-      - result is changed
-      - result.failed == false
-      - result.exists == true
-
-- name: Check change owner and rename db
-  <<: *task_params
-  community.cockroachdb.cockroachdb_db:
-    <<: *conn_params
-    name: dev_db
-    target: prod_db
-    owner: root
-  register: result
-
-- name: Check rename db
-  assert:
-    that:
-      - result is changed
-      - result.failed == false
-      - result.exists == true
-
 - name: Check drop db
   <<: *task_params
   community.cockroachdb.cockroachdb_db:
