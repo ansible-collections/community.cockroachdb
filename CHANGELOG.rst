@@ -1,9 +1,31 @@
-==============================================
-Community CockroachDB Collection Release Notes
-==============================================
+============================================================
+Community CockroachDB Collection Release Notes Release Notes
+============================================================
 
 .. contents:: Topics
 
+
+v0.3.0
+======
+
+Release Summary
+---------------
+
+This is the minor release of the ``community.cockroachdb`` collection.
+This changelog contains all changes to the modules and plugins in this collection
+that have been made after the previous release.
+
+Bugfixes
+--------
+
+- Collection core functions - change place where the required libs check is invoked to avoid unexpected errors when psycopg2 is missed (https://github.com/ansible-collections/community.cockroachdb/pull/33).
+- Collection core functions - use vendored version of ``distutils.version`` instead of the deprecated Python standard library ``distutils``.
+- Include ``simplified_bsd.txt`` license file for module utils.
+
+New Modules
+-----------
+
+- cockroachdb_db - Create, modify or delete a CockroachDB database
 
 v0.2.0
 ======
