@@ -1,6 +1,6 @@
-============================================================
-Community CockroachDB Collection Release Notes Release Notes
-============================================================
+==============================================
+Community CockroachDB Collection Release Notes
+==============================================
 
 .. contents:: Topics
 
