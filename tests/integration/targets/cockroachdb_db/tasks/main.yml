@@ -29,8 +29,7 @@
     assert:
       that:
         - result is changed
-        - result.failed == false
-        - result.exists == false
+        - result is not failed
 
   - name: Change owner
     <<: *task_params
@@ -44,10 +43,9 @@
     assert:
       that:
         - result is changed
-        - result.failed == false
-        - result.exists == true
+        - result is not failed
 
-  - name: Check drop db
+  - name: Check drop non-existent db
     <<: *task_params
     community.cockroachdb.cockroachdb_db:
       <<: *conn_params
@@ -58,6 +56,19 @@
   - name: Check drop db
     assert:
       that:
+        - result is not changed
+        - result is not failed
+
+  - name: Check drop db
+    <<: *task_params
+    community.cockroachdb.cockroachdb_db:
+      <<: *conn_params
+      name: test_db
+      state: absent
+    register: result
+
+  - name: Check drop db
+    assert:
+      that:
         - result is changed
-        - result.failed == false
-        - result.exists == true
+        - result is not failed

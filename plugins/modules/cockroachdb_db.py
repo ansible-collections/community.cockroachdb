@@ -92,9 +92,9 @@ class CockroachDBDatabase():
         self.owner = None
         # Update the above by fetching
         # the info from the database
-        self.__fetch_info()
+        self.fetch_info()
 
-    def __fetch_info(self):
+    def fetch_info(self):
         self.cursor.execute('SHOW DATABASES')
         res = self.cursor.fetchall()
         for d in res:
@@ -110,11 +110,12 @@ class CockroachDBDatabase():
             return
 
         query = 'CREATE DATABASE "%s"' % self.name
-        if self.module.params['owner']:
-            query += ' OWNER %s' % (self.module.params['owner'])
 
         self.cursor.execute(query)
-        executed_statements.append((query, ()))
+        executed_statements.append(query)
+
+        if self.module.params['owner']:
+            self.__change_owner(self.module.params['owner'])
 
     def drop(self):
         if self.module.check_mode:
@@ -122,7 +123,7 @@ class CockroachDBDatabase():
 
         query = 'DROP DATABASE "%s"' % self.name
         self.cursor.execute(query)
-        executed_statements.append((query, ()))
+        executed_statements.append(query)
 
     def modify(self, owner):
         changed = False
@@ -139,7 +140,7 @@ class CockroachDBDatabase():
     def __change_owner(self, new_owner):
         query = 'ALTER DATABASE "%s" OWNER TO %s' % (self.name, new_owner)
         self.cursor.execute(query)
-        executed_statements.append((query, ()))
+        executed_statements.append(query)
 
 
 def main():
