@@ -111,7 +111,7 @@ class CockroachDBDatabase():
 
         query = 'CREATE DATABASE "%s"' % self.name
         if self.module.params['owner']:
-            query += 'OWNER %s' % (self.module.params['owner'])
+            query += ' OWNER %s' % (self.module.params['owner'])
 
         self.cursor.execute(query)
         executed_statements.append((query, ()))
