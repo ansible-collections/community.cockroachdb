@@ -16,49 +16,48 @@
     task_parameters: &task_params
       register: result
 
+  block:
+  - name: Create DB
+    <<: *task_params
+    community.cockroachdb.cockroachdb_db:
+      <<: *conn_params
+      name: test_db
+      owner: root
+    register: result
 
+  - name: Check create db
+    assert:
+      that:
+        - result is changed
+        - result.failed == false
+        - result.exists == false
 
-- name: Create DB
-  <<: *task_params
-  community.cockroachdb.cockroachdb_db:
-    <<: *conn_params
-    name: test_db
-    owner: root
-  register: result
+  - name: Change owner
+    <<: *task_params
+    community.cockroachdb.cockroachdb_db:
+      <<: *conn_params
+      name: test_db
+      owner: admin
+    register: result
 
-- name: Check create db
-  assert:
-    that:
-      - result is changed
-      - result.failed == false
-      - result.exists == false
+  - name: Check change owner
+    assert:
+      that:
+        - result is changed
+        - result.failed == false
+        - result.exists == true
 
-- name: Change owner
-  <<: *task_params
-  community.cockroachdb.cockroachdb_db:
-    <<: *conn_params
-    name: test_db
-    owner: admin
-  register: result
+  - name: Check drop db
+    <<: *task_params
+    community.cockroachdb.cockroachdb_db:
+      <<: *conn_params
+      name: prod_db
+      state: absent
+    register: result
 
-- name: Check change owner
-  assert:
-    that:
-      - result is changed
-      - result.failed == false
-      - result.exists == true
-
-- name: Check drop db
-  <<: *task_params
-  community.cockroachdb.cockroachdb_db:
-    <<: *conn_params
-    name: prod_db
-    state: absent
-  register: result
-
-- name: Check drop db
-  assert:
-    that:
-      - result is changed
-      - result.failed == false
-      - result.exists == true
+  - name: Check drop db
+    assert:
+      that:
+        - result is changed
+        - result.failed == false
+        - result.exists == true
