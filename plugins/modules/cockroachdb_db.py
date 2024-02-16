@@ -124,7 +124,7 @@ class CockroachDBDatabase():
         self.cursor.execute(query)
         executed_statements.append((query, ()))
 
-    def modify(self, owner, target):
+    def modify(self, owner):
         changed = False
 
         # Change owner
@@ -153,7 +153,6 @@ def main():
         name=dict(type='str', required=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         owner=dict(type='str'),
-        target=dict(type='str'),
     )
 
     # Instantiate an object of module class
@@ -170,7 +169,6 @@ def main():
     name = module.params['name']
     state = module.params['state']
     owner = module.params['owner']
-    target = module.params['target']
 
     # Set defaults
     changed = False
@@ -191,7 +189,7 @@ def main():
             database.create()
             changed = True
         else:
-            changed = database.modify(owner, target)
+            changed = database.modify(owner)
     else:
         # When state is absent
         if database.exists:
