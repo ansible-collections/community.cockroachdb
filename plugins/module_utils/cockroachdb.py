@@ -19,9 +19,10 @@ except ImportError:
     HAS_PSYCOPG2 = False
 
 from ansible.module_utils.basic import missing_required_lib
+from ansible.module_utils.compat.version import LooseVersion
 from ansible.module_utils._text import to_native
 from ansible.module_utils.six import iteritems
-from ansible_collections.community.cockroachdb.plugins.module_utils.version import LooseVersion
+from ansible.module_utils.compat.version import LooseVersion
 
 
 def common_argument_spec():
