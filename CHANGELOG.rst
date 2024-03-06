@@ -5,6 +5,19 @@ Community CockroachDB Collection Release Notes
 .. contents:: Topics
 
 
+v0.3.1
+======
+
+Release Summary
+---------------
+
+This is a patch release of the community.cockroachdb collection.
+
+Bugfixes
+--------
+
+- cockroachdb_db - fix the broken ``owner`` argument.
+
 v0.3.0
 ======
 
