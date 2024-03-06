@@ -50,3 +50,12 @@ releases:
       name: cockroachdb_db
       namespace: ''
     release_date: '2023-04-27'
+  0.3.1:
+    changes:
+      bugfixes:
+      - cockroachdb_db - fix the broken ``owner`` argument.
+      release_summary: This is a patch release of the community.cockroachdb collection.
+    fragments:
+    - 0-cockroachdb_db.yml
+    - 0.3.1.yml
+    release_date: '2024-03-06'
