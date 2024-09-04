@@ -1,6 +1,6 @@
 # CockroachDB collection for Ansible
 
-[![Plugins CI](https://github.com/ansible-collections/community.cockroachdb/workflows/Plugins%20CI/badge.svg?event=push)](https://github.com/ansible-collections/community.cockroachdb/actions?query=workflow%3A"Plugins+CI") [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cockroachdb)](https://codecov.io/gh/ansible-collections/community.cockroachdb)
+IMPORTANT: We're archiving this repo and deprecating the collection on Galaxy due to a lack of community activity.
 
 ## Code of Conduct
 
